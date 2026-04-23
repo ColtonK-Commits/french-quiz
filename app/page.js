@@ -77,7 +77,7 @@ function Home() {
   const [answered, setAnswered] = useState(false);
   const [selected, setSelected] = useState(null);
 
-  const levels = ['A1', 'A2'];
+  const levels = ['A1', 'A2', 'B1', 'B2'];
   const topics = ['French Grammar', 'French History & Geography', 'French Regional Food & Cooking'];
 const [questions, setQuestions] = useState([]);
 const [loading, setLoading] = useState(false);
