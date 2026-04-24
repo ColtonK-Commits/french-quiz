@@ -49,6 +49,8 @@ function ExpressionsQuizPage() {
   const [language, setLanguage] = useState('french');
   const [hydrated, setHydrated] = useState(false);
   const [done, setDone] = useState(false);
+  const [wrongAnswers, setWrongAnswers] = useState([]);
+  const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('expressionsMode');
@@ -85,6 +87,15 @@ function ExpressionsQuizPage() {
     if (answered) return;
     setSelected(i);
     setAnswered(true);
+    const correct = expressions[current];
+    const isCorrect = options[i].id === correct.id;
+    if (!isCorrect) {
+      setWrongAnswers(prev => [...prev, {
+        expression: correct,
+        selectedAnswer: options[i],
+        options: options,
+      }]);
+    }
   }
 
   function next() {
@@ -101,20 +112,74 @@ function ExpressionsQuizPage() {
     setDone(false);
     setAnswered(false);
     setSelected(null);
+    setWrongAnswers([]);
+    setShowReview(false);
   }
 
   if (!hydrated || expressions.length === 0) return null;
 
-  const expr = expressions[current];
-  const question = language === 'french' ? expr.french : expr.english;
-  const pct = Math.round(((current + 1) / expressions.length) * 100);
-  const QuestionFlag = language === 'french' ? FrenchFlag : AmericanFlag;
+  // Review screen
+  if (showReview) {
+    const QuestionFlag = language === 'french' ? FrenchFlag : AmericanFlag;
+    const AnswerFlag = language === 'french' ? AmericanFlag : FrenchFlag;
+    return (
+      <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '500', marginBottom: '0.25rem' }}>Review</h1>
+        <p style={{ color: '#999', fontSize: '14px', marginBottom: '1.5rem' }}>
+          {wrongAnswers.length} incorrect answer{wrongAnswers.length > 1 ? 's' : ''}
+        </p>
+        {wrongAnswers.map((item, idx) => {
+          const question = language === 'french' ? item.expression.french : item.expression.english;
+          const correctAnswer = language === 'french' ? item.expression.english : item.expression.french;
+          const selectedAnswer = language === 'french' ? item.selectedAnswer.english : item.selectedAnswer.french;
+          return (
+            <div key={idx} style={{ background: 'white', border: '1px solid #eee', borderRadius: '12px', padding: '1.25rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+                <QuestionFlag />
+                <p style={{ fontSize: '15px', fontWeight: '500', color: '#111', margin: 0, lineHeight: '1.5' }}>{question}</p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '0.75rem' }}>
+                <div style={{ padding: '0.6rem 0.9rem', border: '1px solid #3B6D11', borderRadius: '8px', background: '#EAF3DE', color: '#27500A', fontSize: '14px', display: 'flex', alignItems: 'center' }}>
+                  <AnswerFlag />
+                  {correctAnswer}
+                  <span style={{ marginLeft: '8px', fontSize: '12px' }}>✓ Correct</span>
+                </div>
+                <div style={{ padding: '0.6rem 0.9rem', border: '1px solid #A32D2D', borderRadius: '8px', background: '#FCEBEB', color: '#501313', fontSize: '14px', display: 'flex', alignItems: 'center' }}>
+                  <AnswerFlag />
+                  {selectedAnswer}
+                  <span style={{ marginLeft: '8px', fontSize: '12px' }}>✗ Your answer</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        <button onClick={() => setShowReview(false)} style={{ width: '100%', padding: '0.85rem', background: '#002395', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '1rem' }}>
+          Back to results
+        </button>
+        <div style={{ textAlign: 'center' }}>
+          <button onClick={() => router.push('/')} style={{ background: 'none', border: 'none', color: '#999', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}>Return to home</button>
+        </div>
+      </main>
+    );
+  }
 
+  // Completion screen
   if (done) return (
     <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem', textAlign: 'center' }}>
       <div style={{ fontSize: '52px', marginBottom: '1rem' }}>🎉</div>
       <h1 style={{ fontSize: '24px', fontWeight: '500', marginBottom: '0.5rem' }}>All done!</h1>
-      <p style={{ color: '#666', marginBottom: '2rem' }}>You went through all {expressions.length} expressions.</p>
+      <p style={{ color: '#666', marginBottom: '1.5rem' }}>You went through all {expressions.length} expressions.</p>
+
+      {wrongAnswers.length > 0 && (
+        <button onClick={() => setShowReview(true)} style={{ width: '100%', padding: '0.85rem', background: '#ED2939', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '1rem' }}>
+          Review {wrongAnswers.length} incorrect answer{wrongAnswers.length > 1 ? 's' : ''} →
+        </button>
+      )}
+
+      {wrongAnswers.length === 0 && (
+        <p style={{ color: '#1D9E75', fontWeight: '500', marginBottom: '1rem' }}>Perfect score — no mistakes! 🌟</p>
+      )}
+
       <button onClick={restart} style={{ width: '100%', padding: '0.85rem', background: '#002395', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '1rem' }}>
         Go again
       </button>
@@ -123,6 +188,11 @@ function ExpressionsQuizPage() {
       </div>
     </main>
   );
+
+  const expr = expressions[current];
+  const question = language === 'french' ? expr.french : expr.english;
+  const pct = Math.round(((current + 1) / expressions.length) * 100);
+  const QuestionFlag = language === 'french' ? FrenchFlag : AmericanFlag;
 
   return (
     <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
@@ -157,8 +227,7 @@ function ExpressionsQuizPage() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <span />
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1rem' }}>
         {answered && (
           <button onClick={next} style={{ padding: '0.6rem 1.25rem', border: '1px solid #ccc', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '14px' }}>
             {current + 1 < expressions.length ? 'Next →' : 'Finish →'}
