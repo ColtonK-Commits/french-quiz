@@ -1,3 +1,4 @@
+// Migration run: April 2026 — Added time column to scores table for timer ranking
 import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';

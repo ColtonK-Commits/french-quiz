@@ -1,3 +1,4 @@
+// Migration run: March 2026 — Initial database setup (questions table)
 import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';

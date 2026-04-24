@@ -1,3 +1,4 @@
+// Seed file — Run as needed to add new questions to the database
 import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';

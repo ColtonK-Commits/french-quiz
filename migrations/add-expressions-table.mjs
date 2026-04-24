@@ -1,3 +1,4 @@
+// Migration run: April 2026 — Added expressions table for flashcards and quiz
 import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
