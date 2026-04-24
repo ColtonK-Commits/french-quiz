@@ -91,7 +91,7 @@ function Home() {
   const [wrongAnswers, setWrongAnswers] = useState([]);
   const timerRef = useRef(null);
 
-  const levels = ['A1', 'A2', 'B1', 'B2'];
+  const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
   const topics = ['French Grammar', 'French History & Geography', 'French Regional Food & Cooking'];
 
   // Timer effect

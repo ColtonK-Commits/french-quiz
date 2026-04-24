@@ -14,520 +14,77 @@ const insert = db.prepare(`
 
 const newQuestions = [
 
-  // A1 Grammar — 1 more needed
-  {
-    level: 'A1', topic: 'French Grammar',
-    question: 'Which is correct: "Il ___ un professeur."',
-    option_a: 'suis', option_b: 'es', option_c: 'est', option_d: 'sont',
-    answer: 2,
-    explanation: "'Est' is the il/elle form of être. Il est un professeur = He is a teacher."
-  },
+  // C1 Grammar
+  { level: 'C1', topic: 'French Grammar', question: 'Choisissez la forme correcte : "Bien qu\'il ___ tard, il a continué à travailler."', option_a: 'était', option_b: 'soit', option_c: 'serait', option_d: 'est', answer: 1, explanation: "'Bien que' exige le subjonctif. — 'Bien que' requires the subjunctive." },
+  { level: 'C1', topic: 'French Grammar', question: 'Quelle phrase utilise correctement le gérondif ?', option_a: 'En avoir mangé, il est parti.', option_b: 'En mangeant, il lisait le journal.', option_c: 'Il mangeant, il lisait.', option_d: 'Mangeant, il a lu le journal.', answer: 1, explanation: "Le gérondif = en + participe présent, même sujet. — Gérondif = en + present participle, same subject." },
+  { level: 'C1', topic: 'French Grammar', question: 'Complétez : "C\'est une décision ___ je ne comprends pas les raisons."', option_a: 'que', option_b: 'qui', option_c: 'dont', option_d: 'laquelle', answer: 2, explanation: "'Dont' remplace 'de + nom'. — 'Dont' replaces 'de + noun'." },
+  { level: 'C1', topic: 'French Grammar', question: 'Quelle est la forme passive correcte de "On a réparé la voiture" ?', option_a: 'La voiture a été réparée.', option_b: 'La voiture était réparée.', option_c: 'La voiture a réparé.', option_d: 'La voiture sera réparée.', answer: 0, explanation: "Passif = être + participe passé accordé. — Passive = être + agreed past participle." },
+  { level: 'C1', topic: 'French Grammar', question: 'Quelle phrase exprime une hypothèse dans le passé ?', option_a: 'Si j\'avais de l\'argent, j\'achèterais une maison.', option_b: 'Si j\'avais eu de l\'argent, j\'aurais acheté une maison.', option_c: 'Si j\'ai de l\'argent, j\'achèterai une maison.', option_d: 'Si j\'aurais de l\'argent, j\'achèterais une maison.', answer: 1, explanation: "Hypothèse passée : plus-que-parfait + conditionnel passé. — Past hypothesis: pluperfect + past conditional." },
+  { level: 'C1', topic: 'French Grammar', question: 'Choisissez la nominalisation correcte de "décider de partir" :', option_a: 'Le décidement de partir', option_b: 'La décision de partir', option_c: 'Le décidage de partir', option_d: 'La décidure de partir', answer: 1, explanation: "Décider → la décision. L\'infinitif reste après 'de'. — Décider → la décision. Infinitive stays after 'de'." },
+  { level: 'C1', topic: 'French Grammar', question: 'Complétez : "Il parle si vite ___ je ne comprends rien."', option_a: 'donc', option_b: 'que', option_c: 'ainsi', option_d: 'pourtant', answer: 1, explanation: "'Si...que' exprime la conséquence. — 'Si...que' expresses consequence." },
+  { level: 'C1', topic: 'French Grammar', question: 'Quelle phrase utilise correctement le subjonctif passé ?', option_a: 'Je suis content qu\'il vienne.', option_b: 'Je suis content qu\'il soit venu.', option_c: 'Je suis content qu\'il venait.', option_d: 'Je suis content qu\'il viendra.', answer: 1, explanation: "Subjonctif passé = subjonctif de être/avoir + participe passé. — Past subjunctive = subjunctive of être/avoir + past participle." },
+  { level: 'C1', topic: 'French Grammar', question: 'Quelle est la différence entre "depuis" et "il y a" ?', option_a: 'Ils sont interchangeables.', option_b: '"Depuis" indique une action en cours ; "il y a" une action terminée.', option_c: '"Depuis" est formel ; "il y a" est familier.', option_d: '"Depuis" s\'utilise au passé composé.', answer: 1, explanation: "'Depuis' + présent = action continue. 'Il y a' + passé = action terminée. — 'Depuis' + present = ongoing. 'Il y a' + past = completed." },
+  { level: 'C1', topic: 'French Grammar', question: 'Complétez : "Quoi qu\'il ___, je resterai calme."', option_a: 'dit', option_b: 'dise', option_c: 'dira', option_d: 'dirait', answer: 1, explanation: "'Quoi que' exige toujours le subjonctif. — 'Quoi que' always requires the subjunctive." },
 
-  // A1 History & Geography — 1 more needed
-  {
-    level: 'A1', topic: 'French History & Geography',
-    question: 'What language do people speak in France?',
-    option_a: 'Spanish', option_b: 'French', option_c: 'Italian', option_d: 'Portuguese',
-    answer: 1,
-    explanation: "French is the official language of France and is spoken by around 68 million people there."
-  },
+  // C1 History & Geography
+  { level: 'C1', topic: 'French History & Geography', question: 'Qu\'est-ce que l\'Édit de Nantes (1598) a accompli ?', option_a: 'Il a déclaré la guerre à l\'Angleterre.', option_b: 'Il a accordé des droits religieux aux protestants français.', option_c: 'Il a établi la République française.', option_d: 'Il a aboli la féodalité.', answer: 1, explanation: "Henri IV a accordé la liberté religieuse aux huguenots. — Henry IV granted religious freedom to Huguenots." },
+  { level: 'C1', topic: 'French History & Geography', question: 'Quelle était la signification de l\'affaire Dreyfus ?', option_a: 'Une crise diplomatique avec l\'Allemagne.', option_b: 'Un scandale révélant l\'antisémitisme dans l\'armée française.', option_c: 'Un complot financier causant la Révolution.', option_d: 'Un conflit colonial en Afrique.', answer: 1, explanation: "Dreyfus, officier juif, fut injustement condamné pour trahison. — Dreyfus, a Jewish officer, was unjustly convicted of treason." },
+  { level: 'C1', topic: 'French History & Geography', question: 'Qu\'est-ce que le Massif Central ?', option_a: 'Une chaîne de montagnes à la frontière espagnole.', option_b: 'Un vaste plateau au centre de la France.', option_c: 'Le quartier financier de Paris.', option_d: 'Un parc national français.', answer: 1, explanation: "Le Massif Central couvre environ 15% du territoire français. — The Massif Central covers about 15% of France." },
+  { level: 'C1', topic: 'French History & Geography', question: 'Quelle ville était la capitale de la Gaule romaine ?', option_a: 'Paris', option_b: 'Marseille', option_c: 'Lyon', option_d: 'Bordeaux', answer: 2, explanation: "Lyon (Lugdunum) était la capitale de la Gaule romaine. — Lyon (Lugdunum) was the capital of Roman Gaul." },
+  { level: 'C1', topic: 'French History & Geography', question: 'Qu\'est-ce que la laïcité en France ?', option_a: 'Le droit de pratiquer toute religion librement.', option_b: 'La séparation stricte de la religion et de l\'État.', option_c: 'Le soutien financier de l\'État aux religions reconnues.', option_d: 'Une loi protégeant les minorités religieuses.', answer: 1, explanation: "La laïcité (1905) sépare strictement l\'Église de l\'État. — Laïcité (1905) strictly separates Church and State." },
+  { level: 'C1', topic: 'French History & Geography', question: 'Quel fut le rôle de la France dans la Révolution américaine ?', option_a: 'La France resta neutre.', option_b: 'La France s\'allia aux colonies américaines contre la Grande-Bretagne.', option_c: 'La France soutint la Grande-Bretagne.', option_d: 'La France intervint uniquement après Yorktown.', answer: 1, explanation: "La France s\'allia aux Américains en 1778, contribuant à la victoire. — France allied with Americans in 1778, contributing to victory." },
+  { level: 'C1', topic: 'French History & Geography', question: 'Qu\'est-ce que la Fronde (1648-1653) ?', option_a: 'Une révolte paysanne contre les impôts féodaux.', option_b: 'Une série de guerres civiles contre le gouvernement royal pendant la minorité de Louis XIV.', option_c: 'Un soulèvement protestant après la révocation de l\'Édit de Nantes.', option_d: 'Un coup militaire contre Napoléon.', answer: 1, explanation: "La Fronde opposa la noblesse à Mazarin. — The Fronde opposed the nobility against Mazarin." },
+  { level: 'C1', topic: 'French History & Geography', question: 'Comment s\'est terminée la présence française en Indochine ?', option_a: 'La France accorda l\'indépendance pacifiquement.', option_b: 'Les forces françaises furent défaites à Diên Biên Phu en 1954.', option_c: 'Les États-Unis rachetèrent l\'Indochine française.', option_d: 'Le Japon occupa définitivement l\'Indochine.', answer: 1, explanation: "La défaite de Diên Biên Phu (1954) mit fin à la présence française. — The defeat at Dien Bien Phu (1954) ended French presence." },
+  { level: 'C1', topic: 'French History & Geography', question: 'Qu\'est-ce que l\'Académie française ?', option_a: 'La plus prestigieuse école d\'art de France.', option_b: 'L\'autorité officielle chargée de la langue française.', option_c: 'L\'équivalent français de la Chambre des Lords.', option_d: 'Un célèbre théâtre parisien.', answer: 1, explanation: "Fondée en 1635, elle régit la langue française. — Founded in 1635, it governs the French language." },
+  { level: 'C1', topic: 'French History & Geography', question: 'Quel est le fleuve le plus long de France ?', option_a: 'La Seine', option_b: 'Le Rhône', option_c: 'La Garonne', option_d: 'La Loire', answer: 3, explanation: "La Loire (1 006 km) est le plus long fleuve de France. — The Loire (1,006 km) is France's longest river." },
 
-  // A1 Food & Cooking — 2 more needed
-  {
-    level: 'A1', topic: 'French Regional Food & Cooking',
-    question: 'What is a croissant?',
-    option_a: 'A type of cheese', option_b: 'A buttery crescent shaped pastry', option_c: 'A French stew', option_d: 'A type of wine',
-    answer: 1,
-    explanation: "A croissant is a buttery flaky crescent shaped pastry, originally inspired by the Austrian kipferl and perfected in France."
-  },
-  {
-    level: 'A1', topic: 'French Regional Food & Cooking',
-    question: 'Which of these is a French cheese?',
-    option_a: 'Cheddar', option_b: 'Gouda', option_c_: 'Brie', option_d: 'Parmesan',
-    option_c: 'Brie',
-    answer: 2,
-    explanation: "Brie is a soft creamy cheese from the Brie region of northern France, one of the most famous French cheeses in the world."
-  },
+  // C1 Food & Cooking
+  { level: 'C1', topic: 'French Regional Food & Cooking', question: 'Qu\'est-ce que le "terroir" dans le contexte culinaire français ?', option_a: 'Un type de marmite en argile.', option_b: 'L\'ensemble des facteurs naturels qui donnent à un produit son caractère distinctif.', option_c: 'Un marché traditionnel français.', option_d: 'Une certification pour les produits biologiques.', answer: 1, explanation: "Le terroir = sol, climat, topographie. Inséparable du produit. — Terroir = soil, climate, topography. Inseparable from the product." },
+  { level: 'C1', topic: 'French Regional Food & Cooking', question: 'Qu\'est-ce que la technique "en papillote" ?', option_a: 'Cuire dans une pâte légère en friture.', option_b: 'Cuire dans un emballage hermétique de papier ou d\'aluminium.', option_c: 'Rôtir lentement sur feu ouvert.', option_d: 'Mariner dans le vin avant la cuisson.', answer: 1, explanation: "En papillote = cuisson dans un papillote scellé, vapeur naturelle. — En papillote = cooking in a sealed parcel, natural steam." },
+  { level: 'C1', topic: 'French Regional Food & Cooking', question: 'Quelles sont les cinq sauces mères de la cuisine française ?', option_a: 'Béchamel, Velouté, Espagnole, Sauce Tomate, Hollandaise', option_b: 'Beurre blanc, Vinaigrette, Hollandaise, Béarnaise, Mayonnaise', option_c: 'Béchamel, Béarnaise, Bordelaise, Lyonnaise, Normande', option_d: 'Velouté, Bordelaise, Mornay, Soubise, Suprême', answer: 0, explanation: "Codifiées par Escoffier : Béchamel, Velouté, Espagnole, Tomate, Hollandaise. — Codified by Escoffier: Béchamel, Velouté, Espagnole, Tomato, Hollandaise." },
+  { level: 'C1', topic: 'French Regional Food & Cooking', question: 'Qu\'est-ce que le "déglaçage" en cuisine française ?', option_a: 'Retirer la peau d\'un poisson.', option_b: 'Ajouter un liquide dans une poêle chaude pour récupérer les sucs caramélisés.', option_c: 'Enrober un aliment de sucre.', option_d: 'Refroidir rapidement une sauce sur glace.', answer: 1, explanation: "Déglacer = liquide + sucs = base de sauce. — Deglaze = liquid + fond = sauce base." },
+  { level: 'C1', topic: 'French Regional Food & Cooking', question: 'Quelle région est associée à la tartiflette ?', option_a: 'Provence', option_b: 'Bretagne', option_c: 'Savoie', option_d: 'Alsace', answer: 2, explanation: "La tartiflette (pommes de terre, reblochon, lardons) vient de Savoie. — Tartiflette (potatoes, reblochon, lardons) comes from Savoie." },
+  { level: 'C1', topic: 'French Regional Food & Cooking', question: 'Qu\'est-ce que le foie gras et quelles régions y sont associées ?', option_a: 'Un magret de canard séché de Provence.', option_b: 'Le foie engraissé de canard ou d\'oie, du Périgord et de Gascogne.', option_c: 'Une terrine de porc de Normandie.', option_d: 'Du saumon fumé de Bretagne.', answer: 1, explanation: "Foie gras = foie engraissé, spécialité du Sud-Ouest. — Foie gras = fattened liver, specialty of the Southwest." },
+  { level: 'C1', topic: 'French Regional Food & Cooking', question: 'Qu\'est-ce qui distingue la moutarde de Dijon ?', option_a: 'Elle est faite avec du vin rouge.', option_b: 'Elle utilise des graines de moutarde brune et du vin blanc ou du verjus.', option_c: 'Elle contient du curcuma.', option_d: 'Elle est moulue grossièrement avec des graines entières.', answer: 1, explanation: "Dijon = graines brunes + vin blanc/verjus = saveur nette et forte. — Dijon = brown seeds + white wine/verjuice = sharp, clean flavour." },
+  { level: 'C1', topic: 'French Regional Food & Cooking', question: 'Qu\'est-ce que la blanquette de veau ?', option_a: 'Un veau rôti de Normandie.', option_b: 'Un ragoût blanc de veau en sauce crème et jaune d\'œuf.', option_c: 'Une escalope de veau fine frite au beurre.', option_d: 'Une terrine de veau lyonnaise.', answer: 1, explanation: "Blanquette = ragoût blanc, sauce crème + jaune d\'œuf. Classique bourgeois. — Blanquette = white stew, cream + egg yolk sauce. Classic bourgeois dish." },
+  { level: 'C1', topic: 'French Regional Food & Cooking', question: 'Quel vignoble produit le Châteauneuf-du-Pape ?', option_a: 'Bordeaux', option_b: 'Bourgogne', option_c: 'Vallée du Rhône', option_d: 'Alsace', answer: 2, explanation: "Châteauneuf-du-Pape vient du Rhône méridional, dominé par le Grenache. — Châteauneuf-du-Pape comes from the southern Rhône, dominated by Grenache." },
+  { level: 'C1', topic: 'French Regional Food & Cooking', question: 'Quel est le rôle de la "liaison" en cuisine française ?', option_a: 'Assaisonner une sauce en fin de cuisson.', option_b: 'Épaissir ou lier une sauce avec des jaunes d\'œufs, de la crème ou de l\'amidon.', option_c: 'Clarifier un bouillon.', option_d: 'Réduire une sauce par ébullition.', answer: 1, explanation: "Liaison = épaississant final (jaunes + crème). Ne pas faire bouillir. — Liaison = final thickener (yolks + cream). Do not boil." },
 
-  // A2 Grammar — 2 more needed
-  {
-    level: 'A2', topic: 'French Grammar',
-    question: 'Choose the correct comparative: "Marie est ___ grande que Pierre."',
-    option_a: 'plus', option_b: 'très', option_c: 'beaucoup', option_d: 'trop',
-    answer: 0,
-    explanation: "'Plus...que' means more...than in French. Marie est plus grande que Pierre = Marie is taller than Pierre."
-  },
-  {
-    level: 'A2', topic: 'French Grammar',
-    question: 'Which sentence is in the futur simple?',
-    option_a: 'Je mange une pomme.', option_b: 'J\'ai mangé une pomme.', option_c: 'Je mangeais une pomme.', option_d: 'Je mangerai une pomme.',
-    answer: 3,
-    explanation: "'Je mangerai' is the futur simple form of manger. It means I will eat — formed by adding the futur endings to the infinitive."
-  },
+  // C2 Grammar
+  { level: 'C2', topic: 'French Grammar', question: 'Quelle phrase illustre correctement le discours indirect au passé ?', option_a: 'Il a dit : "Je suis fatigué."', option_b: 'Il a dit qu\'il était fatigué.', option_c: 'Il a dit qu\'il est fatigué.', option_d: 'Il a dit : il était fatigué.', answer: 1, explanation: "Discours indirect passé : présent → imparfait, je → il. — Indirect speech past: present → imperfect, je → il." },
+  { level: 'C2', topic: 'French Grammar', question: 'Laquelle de ces phrases utilise correctement le plus-que-parfait ?', option_a: 'Quand je suis arrivé, il partait déjà.', option_b: 'Quand je suis arrivé, il était déjà parti.', option_c: 'Quand j\'arrivais, il est déjà parti.', option_d: 'Quand je suis arrivé, il a déjà parti.', answer: 1, explanation: "Plus-que-parfait = action antérieure à une autre action passée. — Pluperfect = action prior to another past action." },
+  { level: 'C2', topic: 'French Grammar', question: 'Choisissez la phrase qui utilise correctement "lequel" :', option_a: 'C\'est le problème lequel je pensais.', option_b: 'C\'est le problème auquel je pensais.', option_c: 'C\'est le problème duquel je pensais.', option_d: 'C\'est le problème pour lequel je pensais.', answer: 1, explanation: "'Penser à' → auquel (à + lequel). — 'Penser à' → auquel (à + lequel)." },
+  { level: 'C2', topic: 'French Grammar', question: 'Quelle est la différence stylistique entre le passé simple et le passé composé ?', option_a: 'Le passé simple est oral ; le passé composé est écrit.', option_b: 'Le passé simple est littéraire et formel ; le passé composé est courant et oral.', option_c: 'Ils sont interchangeables dans tous les contextes.', option_d: 'Le passé simple exprime la durée ; le passé composé l\'instantané.', answer: 1, explanation: "Passé simple = littérature/histoire. Passé composé = langue parlée/écrite courante. — Passé simple = literature. Passé composé = everyday spoken/written." },
+  { level: 'C2', topic: 'French Grammar', question: 'Quelle phrase utilise correctement l\'infinitif passif ?', option_a: 'Il espère être promu.', option_b: 'Il espère avoir promu.', option_c: 'Il espère être promis.', option_d: 'Il espère avoir été promu.', answer: 0, explanation: "Infinitif passif = être + participe passé accordé. — Passive infinitive = être + agreed past participle." },
+  { level: 'C2', topic: 'French Grammar', question: 'Complétez correctement : "___ tu fasses, il sera mécontent."', option_a: 'Quoi que', option_b: 'Quoique', option_c: 'Bien que', option_d: 'Encore que', answer: 0, explanation: "'Quoi que' (= quelle que soit la chose que) + subjonctif. — 'Quoi que' (= whatever) + subjunctive." },
+  { level: 'C2', topic: 'French Grammar', question: 'Quelle phrase illustre une concession correcte au subjonctif ?', option_a: 'Bien qu\'il est riche, il est avare.', option_b: 'Bien qu\'il soit riche, il est avare.', option_c: 'Bien qu\'il serait riche, il est avare.', option_d: 'Bien qu\'il était riche, il est avare.', answer: 1, explanation: "'Bien que' exige le subjonctif. — 'Bien que' requires the subjunctive." },
+  { level: 'C2', topic: 'French Grammar', question: 'Identifiez la phrase au conditionnel passé correctement formée :', option_a: 'Si j\'aurais su, je serais venu.', option_b: 'Si j\'avais su, je serais venu.', option_c: 'Si j\'avais su, je venais.', option_d: 'Si j\'ai su, je serais venu.', answer: 1, explanation: "Type 3 : plus-que-parfait + conditionnel passé. — Type 3: pluperfect + past conditional." },
+  { level: 'C2', topic: 'French Grammar', question: 'Quelle est la fonction du subjonctif dans "Il faut que tu viennes" ?', option_a: 'Exprimer une certitude.', option_b: 'Exprimer une nécessité ou obligation.', option_c: 'Exprimer une hypothèse future.', option_d: 'Exprimer un souhait irréalisable.', answer: 1, explanation: "'Il faut que' = nécessité → subjonctif obligatoire. — 'Il faut que' = necessity → subjunctive required." },
+  { level: 'C2', topic: 'French Grammar', question: 'Quelle phrase utilise correctement la mise en relief (emphase) ?', option_a: 'C\'est lui qui a fait ça.', option_b: 'Il est lui qui a fait ça.', option_c: 'C\'est lui qu\'a fait ça.', option_d: 'Lui c\'est qui a fait ça.', answer: 0, explanation: "Mise en relief : C\'est + pronom tonique + qui/que. — Emphasis: C\'est + stressed pronoun + qui/que." },
 
-  // A2 History & Geography — 2 more needed
-  {
-    level: 'A2', topic: 'French History & Geography',
-    question: 'What is the name of the royal palace near Paris built by Louis XIV?',
-    option_a: 'The Louvre', option_b: 'Château de Chambord', option_c: 'Palace of Versailles', option_d: 'Château de Vincennes',
-    answer: 2,
-    explanation: "The Palace of Versailles was built by Louis XIV and became the centre of French political power for over a century."
-  },
-  {
-    level: 'A2', topic: 'French History & Geography',
-    question: 'Which French overseas territory is located in the Caribbean?',
-    option_a: 'Réunion', option_b: 'French Guiana', option_c: 'Martinique', option_d: 'New Caledonia',
-    answer: 2,
-    explanation: "Martinique is a French overseas territory located in the Caribbean Sea. It is fully part of France and the European Union."
-  },
+  // C2 History & Geography
+  { level: 'C2', topic: 'French History & Geography', question: 'Quelle fut la signification du traité de Westphalie (1648) pour la France ?', option_a: 'Il mit fin à la Guerre de Cent Ans.', option_b: 'Il confirma les gains territoriaux français et établit la France comme puissance dominante en Europe.', option_c: 'Il accorda l\'indépendance aux colonies françaises.', option_d: 'Il établit la République française.', answer: 1, explanation: "Westphalie = gains en Alsace + hégémonie française en Europe. — Westphalia = gains in Alsace + French hegemony in Europe." },
+  { level: 'C2', topic: 'French History & Geography', question: 'Qu\'est-ce que l\'"exception culturelle française" ?', option_a: 'Le refus de la France de rejoindre l\'OTAN.', option_b: 'La politique française de protection de ses industries culturelles face à la mondialisation.', option_c: 'L\'exemption légale des œuvres d\'art français des taxes d\'importation.', option_d: 'La constitution laïque unique de la France.', answer: 1, explanation: "Exception culturelle = protéger cinéma, musique, littérature du libre-échange. — Cultural exception = protecting cinema, music, literature from free trade." },
+  { level: 'C2', topic: 'French History & Geography', question: 'Quelles furent les principales causes des événements de Mai 1968 en France ?', option_a: 'L\'opposition à la guerre du Vietnam et la récession économique.', option_b: 'Le mécontentement étudiant et les grèves ouvrières généralisées contre le conservatisme gaulliste.', option_c: 'Une tentative de coup d\'État militaire contre de Gaulle.', option_d: 'Des manifestations contre les essais nucléaires français.', answer: 1, explanation: "Mai 68 = révolte étudiante + grève générale de 10 millions de travailleurs. — May 68 = student revolt + general strike of 10 million workers." },
+  { level: 'C2', topic: 'French History & Geography', question: 'Qu\'est-ce que l\'"Hexagone" et pourquoi appelle-t-on ainsi la France ?', option_a: 'Un terme désignant la France métropolitaine en raison de sa forme géographique à six côtés.', option_b: 'Le nom des six départements d\'outre-mer français.', option_c: 'Les six régions fondatrices de la République française.', option_d: 'Une référence aux six pays frontaliers de la France.', answer: 0, explanation: "L\'Hexagone = France métropolitaine, forme approximativement hexagonale. — L\'Hexagone = metropolitan France, roughly hexagonal shape." },
+  { level: 'C2', topic: 'French History & Geography', question: 'Quel était le problème des "banlieues" dans la France contemporaine ?', option_a: 'Le déclin des communautés rurales dû à l\'urbanisation.', option_b: 'La marginalisation sociale et économique de populations d\'origine immigrée dans les cités de banlieue.', option_c: 'La dégradation environnementale des régions côtières.', option_d: 'La corruption politique dans les gouvernements régionaux.', answer: 1, explanation: "Banlieues = chômage, discrimination, échec d\'intégration républicaine. — Banlieues = unemployment, discrimination, failure of republican integration." },
+  { level: 'C2', topic: 'French History & Geography', question: 'Quelle fut la signification de l\'accord de Schengen pour la France ?', option_a: 'Il établit la France comme membre fondateur de l\'OTAN.', option_b: 'Il supprima les contrôles aux frontières entre la France et la plupart des pays européens.', option_c: 'Il créa la monnaie unique européenne.', option_d: 'Il accorda la citoyenneté française aux résidents des anciennes colonies.', answer: 1, explanation: "Schengen (1985/1995) = libre circulation des personnes en Europe. — Schengen (1985/1995) = free movement of people in Europe." },
+  { level: 'C2', topic: 'French History & Geography', question: 'Comment la Révolution française a-t-elle influencé le droit européen moderne ?', option_a: 'Elle inspira le Code Napoléon, base de nombreux systèmes juridiques européens.', option_b: 'Elle créa directement l\'Union européenne.', option_c: 'Elle établit la Common Law comme norme européenne.', option_d: 'Elle n\'eut aucune influence durable sur le droit européen.', answer: 0, explanation: "Le Code Napoléon (1804) influence encore de nombreux systèmes juridiques. — The Napoleonic Code (1804) still influences many legal systems." },
+  { level: 'C2', topic: 'French History & Geography', question: 'Qu\'est-ce que la "politique de la grandeur" de de Gaulle ?', option_a: 'Un programme de reconstruction économique après la Seconde Guerre mondiale.', option_b: 'La vision d\'une France indépendante et influente sur la scène mondiale, notamment vis-à-vis des superpuissances.', option_c: 'Un plan d\'expansion coloniale en Afrique.', option_d: 'Une politique d\'intégration européenne totale.', answer: 1, explanation: "De Gaulle = indépendance nationale, force de frappe nucléaire, refus de l\'hégémonie américaine. — De Gaulle = national independence, nuclear deterrent, rejection of US hegemony." },
+  { level: 'C2', topic: 'French History & Geography', question: 'Quel est le lien entre la Révolution française et la Déclaration universelle des droits de l\'homme ?', option_a: 'La Déclaration universelle est une copie directe de 1789.', option_b: 'La Déclaration de 1789 inspira les principes des droits universels codifiés en 1948.', option_c: 'Il n\'y a aucun lien historique entre les deux documents.', option_d: 'La France rédigea seule la Déclaration universelle en 1948.', answer: 1, explanation: "La DDHC (1789) inspira la DUDH (1948) : liberté, égalité, droits universels. — The 1789 Declaration inspired the 1948 Universal Declaration." },
+  { level: 'C2', topic: 'French History & Geography', question: 'Pourquoi Napoléon est-il une figure ambiguë dans l\'histoire française ?', option_a: 'Parce qu\'il fut à la fois militairement brillant et despotique, réformateur et restaurateur de l\'esclavage.', option_b: 'Parce qu\'il refusa de se couronner Empereur.', option_c: 'Parce qu\'il abandonna les idéaux de la Révolution dès le début.', option_d: 'Parce qu\'il perdit toutes ses batailles militaires.', answer: 0, explanation: "Napoléon = génie militaire + Code civil + rétablissement de l\'esclavage + despotisme. — Napoleon = military genius + Civil Code + restoration of slavery + despotism." },
 
-  // A2 Food & Cooking — 2 more needed
-  {
-    level: 'A2', topic: 'French Regional Food & Cooking',
-    question: 'What is the difference between a crêpe and a galette?',
-    option_a: 'A galette is sweet, a crêpe is savoury', option_b: 'A crêpe is made with wheat flour, a galette with buckwheat', option_c: 'They are exactly the same thing', option_d: 'A galette is thicker than a crêpe',
-    answer: 1,
-    explanation: "Crêpes are made with wheat flour and are typically sweet. Galettes are made with buckwheat flour and are traditionally savoury, filled with cheese, ham or eggs."
-  },
-  {
-    level: 'A2', topic: 'French Regional Food & Cooking',
-    question: 'What is "beurre blanc"?',
-    option_a: 'A type of white bread', option_b: 'A classic French butter sauce', option_c: 'A white wine from Burgundy', option_d: 'A cream based dessert',
-    answer: 1,
-    explanation: "Beurre blanc is a classic French sauce made from butter, white wine and shallots, typically served with fish. It originated in the Loire Valley."
-  },
-
-  // B1 Grammar — 10 needed
-  {
-    level: 'B1', topic: 'French Grammar',
-    question: 'Which sentence uses the subjonctif correctly?',
-    option_a: 'Je veux que tu viens.', option_b: 'Je veux que tu viennes.', option_c: 'Je veux que tu venais.', option_d: 'Je veux que tu es venu.',
-    answer: 1,
-    explanation: "After 'je veux que' the subjunctive is required. 'Viennes' is the subjunctive form of venir for 'tu'. Je veux que tu viennes = I want you to come."
-  },
-  {
-    level: 'B1', topic: 'French Grammar',
-    question: 'What does the conditionnel present express?',
-    option_a: 'A completed past action', option_b: 'A habitual past action', option_c: 'A hypothetical or polite action', option_d: 'A future certainty',
-    answer: 2,
-    explanation: "The conditionnel present expresses hypothetical situations (if I were rich, I would buy...) and polite requests (I would like...). Je voudrais un café = I would like a coffee."
-  },
-  {
-    level: 'B1', topic: 'French Grammar',
-    question: 'Choose the correct relative pronoun: "C\'est le livre ___ j\'ai lu."',
-    option_a: 'qui', option_b: 'que', option_c: 'dont', option_d: 'où',
-    answer: 1,
-    explanation: "'Que' is used as a relative pronoun when it replaces the direct object of the clause. C'est le livre que j'ai lu = It's the book that I read."
-  },
-  {
-    level: 'B1', topic: 'French Grammar',
-    question: 'Which sentence correctly uses "dont"?',
-    option_a: 'C\'est la ville dont je visite.', option_b: 'C\'est l\'homme dont je parle.', option_c: 'C\'est le film dont j\'ai vu.', option_d: 'C\'est la maison dont elle habite.',
-    answer: 1,
-    explanation: "'Dont' replaces de + noun. Parler de quelqu'un = to talk about someone. C'est l'homme dont je parle = He's the man I'm talking about."
-  },
-  {
-    level: 'B1', topic: 'French Grammar',
-    question: 'What is the correct passive form of "On a construit cette église au 12ème siècle"?',
-    option_a: 'Cette église a été construite au 12ème siècle.', option_b: 'Cette église était construite au 12ème siècle.', option_c: 'Cette église a construit au 12ème siècle.', option_d: 'Cette église sera construite au 12ème siècle.',
-    answer: 0,
-    explanation: "The passive voice in French uses être + past participle. The past participle agrees with the subject — église is feminine so 'construite'."
-  },
-  {
-    level: 'B1', topic: 'French Grammar',
-    question: 'Complete with the correct pronoun: "Je ___ ai parlé hier." (referring to mes amis)',
-    option_a: 'les', option_b: 'leur', option_c: 'y', option_d: 'en',
-    answer: 1,
-    explanation: "'Leur' is the indirect object pronoun for plural people. Parler à quelqu'un = to speak to someone. Je leur ai parlé = I spoke to them."
-  },
-  {
-    level: 'B1', topic: 'French Grammar',
-    question: 'Which sentence uses "y" correctly?',
-    option_a: 'J\'y pense souvent.', option_b: 'Je y vais demain.', option_c: 'Il y mange une pomme.', option_d: 'Nous y aimons beaucoup.',
-    answer: 0,
-    explanation: "'Y' replaces a location or an expression with 'à'. Penser à quelque chose = to think about something. J'y pense = I think about it."
-  },
-  {
-    level: 'B1', topic: 'French Grammar',
-    question: 'What tense is used in "Si j\'avais de l\'argent, j\'achèterais une voiture"?',
-    option_a: 'Imparfait + futur simple', option_b: 'Imparfait + conditionnel présent', option_c: 'Plus-que-parfait + conditionnel passé', option_d: 'Présent + conditionnel présent',
-    answer: 1,
-    explanation: "This is a hypothetical condition (type 2). The structure is imparfait in the si clause + conditionnel présent in the result clause."
-  },
-  {
-    level: 'B1', topic: 'French Grammar',
-    question: 'Choose the correct form: "Il faut que nous ___ à l\'heure."',
-    option_a: 'arrivons', option_b: 'arriverons', option_c: 'arrivions', option_d: 'arrivions',
-    answer: 2,
-    explanation: "'Il faut que' always triggers the subjunctive. 'Arrivions' is the subjunctive form of arriver for 'nous'."
-  },
-  {
-    level: 'B1', topic: 'French Grammar',
-    question: 'Which is the correct use of "en"?',
-    option_a: 'J\'en vais au marché.', option_b: 'Elle en a mangé trois.', option_c: 'Nous en allons partir.', option_d: 'Tu en aimes le chocolat.',
-    answer: 1,
-    explanation: "'En' replaces a quantity or a noun preceded by 'de'. Elle a mangé trois croissants → Elle en a mangé trois = She ate three of them."
-  },
-
-  // B1 History & Geography — 10 needed
-  {
-    level: 'B1', topic: 'French History & Geography',
-    question: 'What was the significance of the Edict of Nantes (1598)?',
-    option_a: 'It declared war on England', option_b: 'It granted religious freedom to French Protestants', option_c: 'It established the French Republic', option_d: 'It abolished feudalism in France',
-    answer: 1,
-    explanation: "The Edict of Nantes, signed by Henry IV, granted the Protestant Huguenots substantial rights in Catholic France, ending decades of religious civil war."
-  },
-  {
-    level: 'B1', topic: 'French History & Geography',
-    question: 'Which French region is known for its Celtic heritage and distinct language?',
-    option_a: 'Alsace', option_b: 'Provence', option_c: 'Bretagne', option_d: 'Occitanie',
-    answer: 2,
-    explanation: "Bretagne (Brittany) has a strong Celtic heritage and its own language, Breton, which is related to Welsh and Cornish rather than French."
-  },
-  {
-    level: 'B1', topic: 'French History & Geography',
-    question: 'What was the Dreyfus Affair?',
-    option_a: 'A 19th century diplomatic crisis with Germany', option_b: 'A political scandal involving a Jewish army officer falsely accused of treason', option_c: 'A financial scandal that caused the French Revolution', option_d: 'A dispute over French colonial territories in Africa',
-    answer: 1,
-    explanation: "The Dreyfus Affair (1894-1906) divided France when Jewish army officer Alfred Dreyfus was wrongly convicted of treason. It exposed deep anti-semitism in French society and led to major political reforms."
-  },
-  {
-    level: 'B1', topic: 'French History & Geography',
-    question: 'What is the Massif Central?',
-    option_a: 'A mountain range on the border with Spain', option_b: 'A large elevated plateau in the centre of France', option_c: 'The main financial district of Paris', option_d: 'A famous French national park',
-    answer: 1,
-    explanation: "The Massif Central is a large highland region covering about 15% of France. It consists of ancient volcanic mountains and plateaus in the centre of the country."
-  },
-  {
-    level: 'B1', topic: 'French History & Geography',
-    question: 'Which French city was the capital of the Roman province of Gaul?',
-    option_a: 'Paris', option_b: 'Marseille', option_c: 'Lyon', option_d: 'Bordeaux',
-    answer: 2,
-    explanation: "Lyon, known as Lugdunum in Roman times, was the capital of Roman Gaul. It remains one of France's most historically rich cities."
-  },
-  {
-    level: 'B1', topic: 'French History & Geography',
-    question: 'What event marked the end of the French Third Republic?',
-    option_a: 'The Franco-Prussian War of 1870', option_b: 'The fall of France to Germany in 1940', option_c: 'The student protests of May 1968', option_d: 'The death of Napoleon III',
-    answer: 1,
-    explanation: "The Third Republic ended in July 1940 when the French parliament voted to grant full powers to Marshal Pétain following the German occupation, establishing the Vichy regime."
-  },
-  {
-    level: 'B1', topic: 'French History & Geography',
-    question: 'Which overseas French territory is located off the coast of Madagascar?',
-    option_a: 'Martinique', option_b: 'Guadeloupe', option_c: 'Réunion', option_d: 'Mayotte',
-    answer: 3,
-    explanation: "Mayotte is a French overseas department located in the Indian Ocean between Madagascar and the African coast. It voted to remain part of France in 2011."
-  },
-  {
-    level: 'B1', topic: 'French History & Geography',
-    question: 'What is the significance of the Battle of Verdun (1916)?',
-    option_a: 'It was the final battle of the Napoleonic Wars', option_b: 'It was one of the longest and most devastating battles of World War I', option_c: 'It marked France\'s entry into World War II', option_d: 'It was a French victory over the Spanish Armada',
-    answer: 1,
-    explanation: "The Battle of Verdun lasted 10 months in 1916 and resulted in over 700,000 casualties. It became a symbol of French determination and suffering in World War I."
-  },
-  {
-    level: 'B1', topic: 'French History & Geography',
-    question: 'What is the Académie Française?',
-    option_a: 'France\'s most prestigious art school', option_b: 'The official body responsible for matters relating to the French language', option_c: 'The French equivalent of the House of Lords', option_d: 'A famous Parisian theatre',
-    answer: 1,
-    explanation: "The Académie Française, founded in 1635, is the official authority on the French language. It publishes the official French dictionary and rules on matters of grammar and vocabulary."
-  },
-  {
-    level: 'B1', topic: 'French History & Geography',
-    question: 'Which French river is the longest?',
-    option_a: 'Seine', option_b: 'Rhône', option_c: 'Garonne', option_d: 'Loire',
-    answer: 3,
-    explanation: "The Loire is the longest river in France at 1,006 km. It flows from the Massif Central westward to the Atlantic Ocean and is famous for its châteaux."
-  },
-
-  // B1 Food & Cooking — 10 needed
-  {
-    level: 'B1', topic: 'French Regional Food & Cooking',
-    question: 'What is "terroir" in the context of French food and wine?',
-    option_a: 'A type of clay cooking pot', option_b: 'The unique environmental factors that give a food or wine its distinctive character', option_c: 'A traditional French market', option_d: 'A certification for organic French produce',
-    answer: 1,
-    explanation: "Terroir refers to the complete natural environment — soil, climate, topography — in which food or wine is produced. It is the concept that a product\'s character is inseparable from where it comes from."
-  },
-  {
-    level: 'B1', topic: 'French Regional Food & Cooking',
-    question: 'What is "en papillote" as a cooking technique?',
-    option_a: 'Cooking in a paper or foil parcel', option_b: 'Deep frying in a light batter', option_c: 'Slow roasting over an open fire', option_d: 'Marinating in wine before cooking',
-    answer: 0,
-    explanation: "En papillote means cooking food sealed inside a folded parcel of parchment paper or foil. The food steams in its own juices, preserving flavour and moisture."
-  },
-  {
-    level: 'B1', topic: 'French Regional Food & Cooking',
-    question: 'Which region is associated with the dish "tartiflette"?',
-    option_a: 'Provence', option_b: 'Bretagne', option_c: 'Savoie', option_d: 'Alsace',
-    answer: 2,
-    explanation: "Tartiflette is a rich dish from the Savoie region in the French Alps, made with potatoes, reblochon cheese, lardons and onions."
-  },
-  {
-    level: 'B1', topic: 'French Regional Food & Cooking',
-    question: 'What is "deglaze" (déglacer) in French cooking?',
-    option_a: 'To remove the skin from a fish', option_b: 'To add liquid to a hot pan to lift caramelised bits from the bottom', option_c: 'To coat food in sugar before serving', option_d: 'To chill a sauce rapidly over ice',
-    answer: 1,
-    explanation: "Deglazing involves adding liquid (wine, stock or water) to a hot pan after cooking meat, lifting the caramelised bits (fond) from the bottom to create a flavourful sauce base."
-  },
-  {
-    level: 'B1', topic: 'French Regional Food & Cooking',
-    question: 'What are "les cinq sauces mères" (the five mother sauces) in French cuisine?',
-    option_a: 'Béchamel, Velouté, Espagnole, Sauce Tomate, Hollandaise', option_b: 'Beurre blanc, Vinaigrette, Hollandaise, Béarnaise, Mayonnaise', option_c: 'Béchamel, Béarnaise, Bordelaise, Lyonnaise, Normande', option_d: 'Velouté, Bordelaise, Mornay, Soubise, Suprême',
-    answer: 0,
-    explanation: "The five French mother sauces, codified by Auguste Escoffier, are Béchamel, Velouté, Espagnole, Sauce Tomate and Hollandaise. All other classical sauces derive from these."
-  },
-  {
-    level: 'B1', topic: 'French Regional Food & Cooking',
-    question: 'What is "foie gras" and which regions are most associated with it?',
-    option_a: 'Cured duck breast from Provence and Bretagne', option_b: 'The fattened liver of duck or goose, from Périgord and Gascogne', option_c: 'A type of pork terrine from Normandie and Alsace', option_d: 'Smoked salmon from Bretagne and Pays de la Loire',
-    answer: 1,
-    explanation: "Foie gras is the fattened liver of duck (canard) or goose (oie), produced by a special feeding process. The Périgord and Gascogne regions in southwest France are the main producers."
-  },
-  {
-    level: 'B1', topic: 'French Regional Food & Cooking',
-    question: 'What distinguishes Dijon mustard from other mustards?',
-    option_a: 'It is made with red wine instead of vinegar', option_b: 'It uses brown or black mustard seeds and white wine or verjuice', option_c: 'It contains turmeric giving it a bright yellow colour', option_d: 'It is coarsely ground with whole mustard seeds',
-    answer: 1,
-    explanation: "Dijon mustard from Bourgogne is made with brown or black mustard seeds and white wine or verjuice (unfermented grape juice), giving it a sharp, clean flavour distinct from milder yellow mustards."
-  },
-  {
-    level: 'B1', topic: 'French Regional Food & Cooking',
-    question: 'What is "blanquette de veau"?',
-    option_a: 'A roasted veal dish from Normandie', option_b: 'A white veal stew in a cream and egg yolk sauce', option_c: 'Thinly sliced veal escalope fried in butter', option_d: 'A veal terrine from the Lyonnaise tradition',
-    answer: 1,
-    explanation: "Blanquette de veau is a classic French white stew of veal, mushrooms and pearl onions in a rich cream sauce enriched with egg yolk. It is one of the most loved dishes of traditional French home cooking."
-  },
-  {
-    level: 'B1', topic: 'French Regional Food & Cooking',
-    question: 'What is the role of "liaison" in French sauce making?',
-    option_a: 'To season a sauce at the end of cooking', option_b: 'To thicken or bind a sauce using egg yolks, cream or starch', option_c: 'To clarify a stock by removing impurities', option_d: 'To reduce a sauce by boiling off excess liquid',
-    answer: 1,
-    explanation: "A liaison is a thickening agent used to finish and bind a sauce. The classic liaison is a mixture of egg yolks and cream stirred in at the end of cooking — it must not boil or it will curdle."
-  },
-  {
-    level: 'B1', topic: 'French Regional Food & Cooking',
-    question: 'Which wine region produces Châteauneuf-du-Pape?',
-    option_a: 'Bordeaux', option_b: 'Bourgogne', option_c: 'Vallée du Rhône', option_d: 'Alsace',
-    answer: 2,
-    explanation: "Châteauneuf-du-Pape is a prestigious appellation in the southern Vallée du Rhône. Its wines, mainly red blends dominated by Grenache, are among the most celebrated in France."
-  },
-
-  // B2 Grammar — 10 needed
-  {
-    level: 'B2', topic: 'French Grammar',
-    question: 'Which sentence correctly uses the subjonctif passé?',
-    option_a: 'Je suis content qu\'il vienne.', option_b: 'Je suis content qu\'il soit venu.', option_c: 'Je suis content qu\'il venait.', option_d: 'Je suis content qu\'il viendra.',
-    answer: 1,
-    explanation: "The subjonctif passé is formed with the subjunctive of avoir or être + past participle. It expresses a completed action in a subjunctive context. Soit venu = has come (subjunctive)."
-  },
-  {
-    level: 'B2', topic: 'French Grammar',
-    question: 'What does the plus-que-parfait express?',
-    option_a: 'A future action relative to another future action', option_b: 'A past action that occurred before another past action', option_c: 'A hypothetical present condition', option_d: 'A repeated action in the present',
-    answer: 1,
-    explanation: "The plus-que-parfait (pluperfect) expresses a past action that happened before another past action. Quand je suis arrivé, il était déjà parti = When I arrived, he had already left."
-  },
-  {
-    level: 'B2', topic: 'French Grammar',
-    question: 'Which sentence uses the conditionnel passé correctly?',
-    option_a: 'Si j\'avais su, je serais venu.', option_b: 'Si j\'aurais su, je serais venu.', option_c: 'Si j\'avais su, je viendrai.', option_d: 'Si j\'ai su, je serais venu.',
-    answer: 0,
-    explanation: "Type 3 conditions use plus-que-parfait in the si clause and conditionnel passé in the result clause. 'Si j'avais su, je serais venu' = If I had known, I would have come."
-  },
-  {
-    level: 'B2', topic: 'French Grammar',
-    question: 'What is the function of "lequel" in this sentence: "C\'est le problème auquel je pensais."?',
-    option_a: 'It is an interrogative pronoun', option_b: 'It is a relative pronoun replacing a noun preceded by à', option_c: 'It is a demonstrative pronoun', option_d: 'It is an indefinite pronoun',
-    answer: 1,
-    explanation: "'Lequel' and its contracted forms (auquel, duquel) are relative pronouns used after prepositions. Auquel = à + lequel. Penser à quelque chose → le problème auquel je pensais."
-  },
-  {
-    level: 'B2', topic: 'French Grammar',
-    question: 'Choose the sentence that correctly uses the gérondif:',
-    option_a: 'En mangeant, il a lu le journal.', option_b: 'Il a mangé en avoir lu le journal.', option_c: 'Mangeant, il lisait le journal.', option_d: 'En avoir mangé, il lit le journal.',
-    answer: 0,
-    explanation: "The gérondif is formed with en + present participle. It expresses simultaneous actions or manner. En mangeant = while eating. Both actions must have the same subject."
-  },
-  {
-    level: 'B2', topic: 'French Grammar',
-    question: 'What is the difference between "depuis" and "il y a" with the present tense?',
-    option_a: 'They are interchangeable in all contexts', option_b: '"Depuis" indicates an ongoing action; "il y a" indicates a completed action in the past', option_c: '"Depuis" is formal; "il y a" is informal', option_d: '"Depuis" is used with the passé composé; "il y a" with the present',
-    answer: 1,
-    explanation: "'Depuis' + present tense describes an action that started in the past and continues now. 'Il y a' + past tense indicates when a completed action occurred. Je vis ici depuis 5 ans = I have lived here for 5 years (still living). Il est arrivé il y a 5 ans = He arrived 5 years ago."
-  },
-  {
-    level: 'B2', topic: 'French Grammar',
-    question: 'Which correctly expresses a concession?',
-    option_a: 'Bien qu\'il soit fatigué, il continue à travailler.', option_b: 'Bien qu\'il est fatigué, il continue à travailler.', option_c: 'Bien qu\'il était fatigué, il continue à travailler.', option_d: 'Bien qu\'il serait fatigué, il continue à travailler.',
-    answer: 0,
-    explanation: "'Bien que' (although) always requires the subjunctive. Bien qu'il soit fatigué = although he is tired. Using indicative after bien que is a common error."
-  },
-  {
-    level: 'B2', topic: 'French Grammar',
-    question: 'What is the correct nominalization of "décider de partir"?',
-    option_a: 'La décision de partement', option_b: 'La décision de partir', option_c: 'Le décidement de partir', option_d: 'La décidure de partir',
-    answer: 1,
-    explanation: "Nominalization converts a verb phrase to a noun phrase. Décider → la décision. The infinitive is kept after de. La décision de partir = the decision to leave."
-  },
-  {
-    level: 'B2', topic: 'French Grammar',
-    question: 'Which sentence correctly uses the passive infinitive?',
-    option_a: 'Il espère être promu.', option_b: 'Il espère avoir promu.', option_c: 'Il espère être promis.', option_d: 'Il espère avoir été promu.',
-    answer: 0,
-    explanation: "The passive infinitive is être + past participle. Il espère être promu = He hopes to be promoted. The past participle agrees with the subject — promu (masculine)."
-  },
-  {
-    level: 'B2', topic: 'French Grammar',
-    question: 'Which of the following is an example of indirect speech (discours indirect)?',
-    option_a: 'Il a dit: "Je suis fatigué."', option_b: 'Il a dit qu\'il était fatigué.', option_c: 'Il a dit qu\'il est fatigué.', option_d: 'Il a dit: il était fatigué.',
-    answer: 1,
-    explanation: "In indirect speech, the reporting verb is in the past so the present tense shifts to imparfait. 'Je suis fatigué' → il a dit qu'il était fatigué. The pronoun also shifts from je to il."
-  },
-
-  // B2 History & Geography — 10 needed
-  {
-    level: 'B2', topic: 'French History & Geography',
-    question: 'What was the significance of the Treaty of Westphalia (1648) for France?',
-    option_a: 'It ended the Hundred Years\' War with England', option_b: 'It confirmed French territorial gains including parts of Alsace and established France as a major European power', option_c: 'It granted independence to French colonies in the Americas', option_d: 'It established the French Republic after the Revolution',
-    answer: 1,
-    explanation: "The Treaty of Westphalia ended the Thirty Years\' War. France gained parts of Alsace and emerged as the dominant power in Europe, beginning a period of French hegemony under Louis XIV."
-  },
-  {
-    level: 'B2', topic: 'French History & Geography',
-    question: 'What was the "Fronde" (1648-1653)?',
-    option_a: 'A peasant revolt against feudal taxes in southern France', option_b: 'A series of civil wars against the royal government during Louis XIV\'s minority', option_c: 'A Protestant uprising following the revocation of the Edict of Nantes', option_d: 'A military coup against Napoleon Bonaparte',
-    answer: 1,
-    explanation: "The Fronde was a series of civil conflicts where the nobility and Paris parlement rebelled against Cardinal Mazarin\'s government during the young Louis XIV\'s reign. Its failure strengthened royal absolutism."
-  },
-  {
-    level: 'B2', topic: 'French History & Geography',
-    question: 'How did the French colonial empire in Indochina end?',
-    option_a: 'France peacefully granted independence following World War II', option_b: 'French forces were defeated at Dien Bien Phu in 1954 leading to the Geneva Accords', option_c: 'The United States bought French Indochina in 1950', option_d: 'Japan permanently occupied Indochina after World War II',
-    answer: 1,
-    explanation: "The Battle of Dien Bien Phu (1954) ended in a decisive Vietnamese victory over French forces. The subsequent Geneva Accords divided Vietnam and ended French colonial rule in Indochina."
-  },
-  {
-    level: 'B2', topic: 'French History & Geography',
-    question: 'What were the main causes of the May 1968 protests in France?',
-    option_a: 'Opposition to French involvement in the Vietnam War and economic recession', option_b: 'Student discontent with the university system combined with widespread worker strikes against Gaullist conservatism', option_c: 'A military coup attempt against de Gaulle by right-wing generals', option_d: 'Mass protests against French nuclear testing in the Pacific',
-    answer: 1,
-    explanation: "May 1968 began with student protests at Nanterre University over outdated university structures, rapidly spreading to a general strike involving 10 million workers. It challenged Gaullist authority and transformed French society and culture."
-  },
-  {
-    level: 'B2', topic: 'French History & Geography',
-    question: 'What is the "exception culturelle française"?',
-    option_a: 'France\'s refusal to join NATO\'s military command', option_b: 'The French policy of protecting its cultural industries from free market globalisation', option_c: 'The legal exemption of French art from import taxes', option_d: 'France\'s unique secular constitution separating church and state',
-    answer: 1,
-    explanation: "The cultural exception is France\'s longstanding policy that cultural products — films, music, literature — should not be subject to the same free trade rules as other goods. It justifies subsidies and quotas to protect French cultural production."
-  },
-  {
-    level: 'B2', topic: 'French History & Geography',
-    question: 'What is the "laïcité" principle in France?',
-    option_a: 'The constitutional right to practice any religion freely', option_b: 'The strict separation of religion from public and state affairs', option_c: 'The French government\'s financial support for recognised religions', option_d: 'A law protecting minority religious communities from discrimination',
-    answer: 1,
-    explanation: "Laïcité, enshrined in the 1905 law and the constitution, mandates a strict separation of religious institutions from the state. It prohibits religious expression in public institutions and is a cornerstone of French republican identity."
-  },
-  {
-    level: 'B2', topic: 'French History & Geography',
-    question: 'What role did France play in the American Revolution?',
-    option_a: 'France remained neutral but supplied weapons covertly', option_b: 'France formally allied with the American colonies, providing military and financial support that proved decisive', option_c: 'France supported Britain in suppressing the American rebellion', option_d: 'France only became involved after the British surrender at Yorktown',
-    answer: 1,
-    explanation: "France formally allied with the American colonies in 1778, motivated by rivalry with Britain. French naval support, financial aid and troops — including Lafayette — were crucial to the American victory at Yorktown in 1781."
-  },
-  {
-    level: 'B2', topic: 'French History & Geography',
-    question: 'What is the "Hexagone" and why is France called this?',
-    option_a: 'A term for metropolitan France based on its roughly six-sided geographical shape', option_b: 'The name for France\'s six overseas departments', option_c: 'The six founding regions of the French Republic after the Revolution', option_d: 'A reference to France\'s six bordering countries',
-    answer: 0,
-    explanation: "L\'Hexagone refers to metropolitan France, whose borders form a rough hexagon shape. It has six sides bordering the Atlantic, English Channel, North Sea, Belgium/Luxembourg, Germany/Switzerland, Italy and the Mediterranean/Spain."
-  },
-  {
-    level: 'B2', topic: 'French History & Geography',
-    question: 'What was the significance of the Schengen Agreement for France?',
-    option_a: 'It established France as a founding member of NATO', option_b: 'It abolished border controls between France and most other European countries', option_c: 'It created the European single currency which France adopted', option_d: 'It granted French citizenship rights to residents of former colonies',
-    answer: 1,
-    explanation: "The Schengen Agreement (signed 1985, implemented 1995) abolished passport controls between participating European countries. France was a founding signatory, allowing free movement of people across most of the EU."
-  },
-  {
-    level: 'B2', topic: 'French History & Geography',
-    question: 'What is the "banlieue" problem in contemporary France?',
-    option_a: 'The decline of rural farming communities due to urbanisation', option_b: 'Social and economic marginalisation of largely immigrant-origin populations in suburban housing estates', option_c: 'Environmental degradation of France\'s coastal regions due to tourism', option_d: 'Political corruption in France\'s regional governments',
-    answer: 1,
-    explanation: "The banlieues are suburban housing estates around French cities with high concentrations of immigrant-origin populations facing unemployment, poor housing and discrimination. Periodic riots — notably in 2005 — have highlighted the failure to integrate these communities into French republican society."
-  },
-
-  // B2 Food & Cooking — 10 needed
-  {
-    level: 'B2', topic: 'French Regional Food & Cooking',
-    question: 'What is the "brigade de cuisine" system developed by Auguste Escoffier?',
-    option_a: 'A French law regulating food hygiene in professional kitchens', option_b: 'A hierarchical system organising kitchen staff into specialised roles', option_c: 'A training programme for apprentice chefs in France', option_d: 'A classification system for French restaurants by quality',
-    answer: 1,
-    explanation: "Escoffier\'s brigade system organises a professional kitchen into a clear hierarchy — chef de cuisine, sous chef, chefs de partie (sauce, fish, grill, pastry etc.) — each responsible for a specific area. It remains the foundation of professional kitchen organisation worldwide."
-  },
-  {
-    level: 'B2', topic: 'French Regional Food & Cooking',
-    question: 'What distinguishes "haute cuisine" from "cuisine bourgeoise"?',
-    option_a: 'Haute cuisine uses only regional ingredients; cuisine bourgeoise uses imported ones', option_b: 'Haute cuisine is elaborate restaurant cooking developed by professional chefs; cuisine bourgeoise is refined but simpler home cooking', option_c: 'Haute cuisine is vegetarian; cuisine bourgeoise includes meat', option_d: 'Haute cuisine originates from Paris; cuisine bourgeoise from the provinces',
-    answer: 1,
-    explanation: "Haute cuisine refers to the elaborate, technically refined cooking of great restaurants and professional chefs. Cuisine bourgeoise is the solid, careful cooking of the French middle-class home — rich, satisfying dishes like pot-au-feu and blanquette de veau."
-  },
-  {
-    level: 'B2', topic: 'French Regional Food & Cooking',
-    question: 'What is "nouvelle cuisine" and which chefs pioneered it?',
-    option_a: 'A 1970s movement emphasising lighter dishes, shorter cooking times and artistic presentation, led by Guérard, Bocuse and the Troisgros brothers', option_b: 'A 1990s movement bringing street food into fine dining restaurants', option_c: 'A return to traditional medieval French recipes championed by Escoffier', option_d: 'A fusion movement combining French and Japanese techniques developed in the 1980s',
-    answer: 0,
-    explanation: "Nouvelle cuisine emerged in the 1970s as a reaction against the heaviness of classical French cooking. It emphasised fresh ingredients, lighter sauces, precise cooking and beautiful presentation. Paul Bocuse, Michel Guérard and the Troisgros brothers were its leading figures."
-  },
-  {
-    level: 'B2', topic: 'French Regional Food & Cooking',
-    question: 'What is "AOC" (Appellation d\'Origine Contrôlée) and why is it important?',
-    option_a: 'A French food safety certification ensuring products meet hygiene standards', option_b: 'A legal designation protecting the geographical origin and production methods of specific French products', option_c: 'An organic certification awarded to French farms meeting environmental standards', option_d: 'A Michelin star equivalent for French food producers',
-    answer: 1,
-    explanation: "AOC guarantees that a product — wine, cheese, butter, olive oil — comes from a specific region and is made according to traditional methods. It protects both the producer and the consumer from imitation. Champagne, Roquefort and Beurre d\'Isigny all have AOC status."
-  },
-  {
-    level: 'B2', topic: 'French Regional Food & Cooking',
-    question: 'What is "gastronomy tourism" and why is France its world capital?',
-    option_a: 'Travel specifically to eat at Michelin starred restaurants, for which Paris has the most in the world', option_b: 'Travel motivated by experiencing a region\'s food culture — markets, producers, restaurants and traditions — for which France\'s regional diversity makes it uniquely rich', option_c: 'Culinary school tourism where students travel to France to train as chefs', option_d: 'Wine tourism centred on France\'s famous vineyard regions',
-    answer: 1,
-    explanation: "France\'s extraordinary regional diversity — each area with its own cheeses, wines, charcuterie, breads and dishes — combined with its deeply ingrained food culture (UNESCO listed French gastronomic meal in 2010) makes it the world\'s leading destination for food-motivated travel."
-  },
-  {
-    level: 'B2', topic: 'French Regional Food & Cooking',
-    question: 'What makes Roquefort cheese unique and how is it produced?',
-    option_a: 'It is a hard sheep\'s milk cheese aged in mountain caves in the Pyrénées', option_b: 'It is a blue sheep\'s milk cheese aged in the natural caves of Combalou near Roquefort-sur-Soulzon', option_c: 'It is a soft goat\'s milk cheese from the Loire Valley with a distinctive blue rind', option_d: 'It is a washed rind cow\'s milk cheese from Normandie with a pungent orange exterior',
-    answer: 1,
-    explanation: "Roquefort is made exclusively from the milk of Lacaune ewes and aged in the natural Combalou caves in Aveyron. The caves\' unique microclimate produces the Penicillium roqueforti mould that creates its distinctive blue veining and sharp flavour."
-  },
-  {
-    level: 'B2', topic: 'French Regional Food & Cooking',
-    question: 'What is the culinary significance of Lyon in France?',
-    option_a: 'It is considered the gastronomic capital of France, home to the "bouchon" tradition and birthplace of Paul Bocuse', option_b: 'It is the centre of French pastry making and home to the most Michelin starred restaurants in France', option_c: 'It is the wine capital of France and home to the world\'s largest wine auction', option_d: 'It is where French haute cuisine originated in the court kitchens of the Renaissance',
-    answer: 0,
-    explanation: "Lyon is widely considered the gastronomic capital of France. Its bouchon restaurants serve traditional Lyonnaise cuisine — quenelles, andouillette, salade lyonnaise. Paul Bocuse, perhaps the most celebrated French chef of the 20th century, was born and worked near Lyon."
-  },
-  {
-    level: 'B2', topic: 'French Regional Food & Cooking',
-    question: 'What is "fermentation lacto" and how is it used in traditional French food preservation?',
-    option_a: 'A chemical preservation method using lactic acid additives approved for French charcuterie', option_b: 'A natural preservation process where beneficial bacteria convert sugars to lactic acid, used in products like choucroute and certain cheeses', option_c: 'A pasteurisation technique developed in France for preserving dairy products', option_d: 'A salt-curing method used exclusively for French fish products like brandade',
-    answer: 1,
-    explanation: "Lacto-fermentation uses naturally occurring bacteria to preserve food. In French cuisine it is most evident in choucroute (fermented cabbage from Alsace) and in the development of flavour in aged cheeses. It predates refrigeration and remains central to French food heritage."
-  },
-  {
-    level: 'B2', topic: 'French Regional Food & Cooking',
-    question: 'How does the Bordeaux wine classification system of 1855 work?',
-    option_a: 'It ranks all French wines from one to five stars based on annual blind tastings', option_b: 'It classified the top Médoc châteaux into five growths (premiers to cinquièmes crus) based on price and reputation at the time', option_c: 'It divides Bordeaux wines into left bank and right bank appellations based on grape variety', option_d: 'It certifies organic Bordeaux producers according to sustainable viticulture standards',
-    answer: 1,
-    explanation: "Napoleon III commissioned the 1855 classification for the Paris World Exhibition. It ranked 61 Médoc châteaux into five tiers (crus classés) plus Sauternes sweet wines. With one famous exception (Mouton Rothschild elevated in 1973), it remains unchanged — a remarkable testament to its enduring authority."
-  },
-  {
-    level: 'B2', topic: 'French Regional Food & Cooking',
-    question: 'What is "cuisine du terroir" and how does it differ from haute cuisine?',
-    option_a: 'Cuisine du terroir is fusion cooking combining French techniques with foreign ingredients, while haute cuisine uses only local French produce', option_b: 'Cuisine du terroir is deeply rooted in regional ingredients, traditions and seasonal rhythms; haute cuisine is technically elaborate restaurant cooking that transcends regional boundaries', option_c: 'Cuisine du terroir is the cooking of French overseas territories; haute cuisine is exclusively Parisian', option_d: 'They are synonymous terms for traditional French regional cooking',
-    answer: 1,
-    explanation: "Cuisine du terroir celebrates the specific character of a region\'s ingredients and traditional recipes — the cassoulet of Languedoc, the bouillabaisse of Marseille, the choucroute of Alsace. Haute cuisine, while often inspired by regional produce, is a creative professional endeavour that operates above regional constraints."
-  },
+  // C2 Food & Cooking
+  { level: 'C2', topic: 'French Regional Food & Cooking', question: 'Qu\'est-ce que la "brigade de cuisine" développée par Escoffier ?', option_a: 'Une loi française réglementant l\'hygiène en cuisine professionnelle.', option_b: 'Un système hiérarchique organisant le personnel de cuisine en rôles spécialisés.', option_c: 'Un programme de formation pour apprentis cuisiniers.', option_d: 'Un système de classification des restaurants français.', answer: 1, explanation: "Brigade = hiérarchie : chef, sous-chef, chefs de partie. Fondement mondial. — Brigade = hierarchy: chef, sous-chef, chefs de partie. Global foundation." },
+  { level: 'C2', topic: 'French Regional Food & Cooking', question: 'Quelle est la différence entre "haute cuisine" et "cuisine bourgeoise" ?', option_a: 'La haute cuisine utilise uniquement des ingrédients régionaux.', option_b: 'La haute cuisine est élaborée et créative ; la cuisine bourgeoise est soignée mais simple, cuisine de maison.', option_c: 'La haute cuisine est végétarienne.', option_d: 'La haute cuisine vient uniquement de Paris.', answer: 1, explanation: "Haute cuisine = art culinaire professionnel. Cuisine bourgeoise = cuisine familiale soignée. — Haute cuisine = professional culinary art. Cuisine bourgeoise = careful home cooking." },
+  { level: 'C2', topic: 'French Regional Food & Cooking', question: 'Qu\'est-ce que la "nouvelle cuisine" et qui en furent les pionniers ?', option_a: 'Un mouvement des années 1970 valorisant légèreté et présentation artistique, mené par Bocuse, Guérard et les frères Troisgros.', option_b: 'Un mouvement des années 1990 intégrant la street food dans la gastronomie.', option_c: 'Un retour aux recettes médiévales françaises.', option_d: 'Une fusion franco-japonaise des années 1980.', answer: 0, explanation: "Nouvelle cuisine (1970s) = légèreté, fraîcheur, précision, présentation. — Nouvelle cuisine (1970s) = lightness, freshness, precision, presentation." },
+  { level: 'C2', topic: 'French Regional Food & Cooking', question: 'Qu\'est-ce que l\'AOC (Appellation d\'Origine Contrôlée) et pourquoi est-elle importante ?', option_a: 'Une certification française de sécurité alimentaire.', option_b: 'Une désignation légale protégeant l\'origine géographique et les méthodes de production de produits spécifiques.', option_c: 'Une certification biologique pour les exploitations françaises.', option_d: 'L\'équivalent gastronomique du Guide Michelin.', answer: 1, explanation: "AOC = origine + méthodes traditionnelles garanties. Ex : Champagne, Roquefort. — AOC = guaranteed origin + traditional methods. E.g.: Champagne, Roquefort." },
+  { level: 'C2', topic: 'French Regional Food & Cooking', question: 'Qu\'est-ce qui rend le Roquefort unique ?', option_a: 'Un fromage de brebis dur affiné dans les Pyrénées.', option_b: 'Un fromage bleu de brebis affiné dans les caves naturelles de Combalou près de Roquefort-sur-Soulzon.', option_c: 'Un fromage de chèvre doux de la Loire.', option_d: 'Un fromage à croûte lavée de Normandie.', answer: 1, explanation: "Roquefort = lait de brebis Lacaune + caves de Combalou + Penicillium roqueforti. — Roquefort = Lacaune ewe milk + Combalou caves + Penicillium roqueforti." },
+  { level: 'C2', topic: 'French Regional Food & Cooking', question: 'Pourquoi Lyon est-elle considérée comme la capitale gastronomique de France ?', option_a: 'Elle possède le plus grand nombre d\'étoiles Michelin au monde.', option_b: 'Elle est le berceau des bouchons lyonnais et patrie de Paul Bocuse.', option_c: 'Elle est le centre de la pâtisserie française.', option_d: 'La haute cuisine française y prit naissance à la Renaissance.', answer: 1, explanation: "Lyon = bouchons + tradition lyonnaise + Paul Bocuse. — Lyon = bouchons + Lyonnaise tradition + Paul Bocuse." },
+  { level: 'C2', topic: 'French Regional Food & Cooking', question: 'Comment fonctionne le classement des vins de Bordeaux de 1855 ?', option_a: 'Il classe tous les vins français de une à cinq étoiles lors de dégustations annuelles à l\'aveugle.', option_b: 'Il classa les meilleurs châteaux du Médoc en cinq crus, selon leur prix et réputation de l\'époque.', option_c: 'Il divise les vins de Bordeaux selon le cépage dominant.', option_d: 'Il certifie les producteurs de Bordeaux selon des critères durables.', answer: 1, explanation: "1855 = 61 châteaux en 5 crus classés. Quasi inchangé depuis. — 1855 = 61 châteaux in 5 classified growths. Almost unchanged since." },
+  { level: 'C2', topic: 'French Regional Food & Cooking', question: 'Qu\'est-ce que la "cuisine du terroir" et en quoi diffère-t-elle de la haute cuisine ?', option_a: 'La cuisine du terroir est une cuisine fusion ; la haute cuisine n\'utilise que des produits locaux.', option_b: 'La cuisine du terroir est ancrée dans les ingrédients et traditions régionales ; la haute cuisine est un art professionnel transcendant les frontières régionales.', option_c: 'La cuisine du terroir vient des territoires d\'outre-mer.', option_d: 'Elles sont synonymes.', answer: 1, explanation: "Terroir = cassoulet, bouillabaisse, choucroute. Haute cuisine = création professionnelle. — Terroir = cassoulet, bouillabaisse, choucroute. Haute cuisine = professional creation." },
+  { level: 'C2', topic: 'French Regional Food & Cooking', question: 'Quelle est la signification culturelle du repas gastronomique français inscrit à l\'UNESCO ?', option_a: 'Il protège les recettes françaises des imitations étrangères.', option_b: 'Il reconnaît le repas gastronomique français comme pratique culturelle vivante, célébrant le plaisir du goût et le partage.', option_c: 'Il classe les restaurants français selon des critères patrimoniaux.', option_d: 'Il interdit la modification des recettes traditionnelles françaises.', answer: 1, explanation: "UNESCO 2010 = le repas français célèbre partage, plaisir, art de vivre. — UNESCO 2010 = French meal celebrates sharing, pleasure, art of living." },
+  { level: 'C2', topic: 'French Regional Food & Cooking', question: 'Comment la fermentation lacto est-elle utilisée dans la cuisine française traditionnelle ?', option_a: 'Une méthode chimique utilisant des additifs d\'acide lactique.', option_b: 'Un processus naturel où des bactéries bénéfiques convertissent les sucres en acide lactique, utilisé dans la choucroute et certains fromages.', option_c: 'Une technique de pasteurisation développée en France.', option_d: 'Un salage exclusif pour les produits de la mer.', answer: 1, explanation: "Lacto-fermentation = conservation naturelle. Ex : choucroute, fromages affinés. — Lacto-fermentation = natural preservation. E.g.: choucroute, aged cheeses." },
 ];
 
 const insertMany = db.transaction((qs) => {
