@@ -87,8 +87,9 @@ export default function AdminPage() {
   }
 
   async function addQuestion() {
-    if (!addForm.question || !addForm.option_a || !addForm.option_b || !addForm.option_c || !addForm.option_d || !addForm.explanation) {
-      setMessage('Please fill in all fields.');
+    const required = [addForm.question, addForm.option_a, addForm.option_b, addForm.option_c, addForm.option_d, addForm.explanation];
+    if (required.some(f => !f || !f.trim())) {
+      setMessage('Please fill in all fields before saving.');
       setTimeout(() => setMessage(''), 3000);
       return;
     }

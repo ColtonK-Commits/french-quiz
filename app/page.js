@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { saveQuizState, clearQuizState, clearResults } from './store';
 import dynamic from 'next/dynamic';
 
 function FrenchFlag({ opacity = 0.13 }) {
@@ -65,186 +67,33 @@ function FrenchFlag({ opacity = 0.13 }) {
   );
 }
 
-function formatTime(seconds) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
-
-function Home() {
+function StartPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [level, setLevel] = useState('');
   const [topic, setTopic] = useState('');
-  const [screen, setScreen] = useState('start');
-  const [current, setCurrent] = useState(0);
-  const [score, setScore] = useState(0);
-  const [answered, setAnswered] = useState(false);
-  const [selected, setSelected] = useState(null);
-  const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [playerName, setPlayerName] = useState('');
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [wrongAnswers, setWrongAnswers] = useState([]);
-  const timerRef = useRef(null);
 
   const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
   const topics = ['French Grammar', 'French History & Geography', 'French Regional Food & Cooking'];
-
-  // Timer effect
-  useEffect(() => {
-    if (timerRunning) {
-      timerRef.current = setInterval(() => {
-        setElapsedTime(t => t + 1);
-      }, 1000);
-    } else {
-      clearInterval(timerRef.current);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [timerRunning]);
-
-  // Load saved state from localStorage on first render
-  useEffect(() => {
-    const saved = localStorage.getItem('frenchQuizState');
-    if (saved) {
-      try {
-        const state = JSON.parse(saved);
-        if (state.screen && state.screen !== 'start' && state.questions?.length > 0) {
-          setScreen(state.screen);
-          setLevel(state.level || '');
-          setTopic(state.topic || '');
-          setCurrent(state.current || 0);
-          setScore(state.score || 0);
-          setQuestions(state.questions || []);
-          setElapsedTime(state.elapsedTime || 0);
-          setWrongAnswers(state.wrongAnswers || []);
-          setAnswered(false);
-          setSelected(null);
-          if (state.screen === 'quiz') setTimerRunning(true);
-        }
-      } catch (e) {
-        localStorage.removeItem('frenchQuizState');
-      }
-    }
-    setHydrated(true);
-  }, []);
-
-  // Save state to localStorage whenever key state changes
-  useEffect(() => {
-    if (!hydrated) return;
-    if (screen === 'start' || screen === 'results' || screen === 'nameentry' || screen === 'review') {
-      localStorage.removeItem('frenchQuizState');
-      return;
-    }
-    if (questions.length > 0) {
-      localStorage.setItem('frenchQuizState', JSON.stringify({
-        screen, level, topic, current, score, questions, elapsedTime, wrongAnswers
-      }));
-    }
-  }, [screen, current, score, elapsedTime, hydrated]);
+  const canStart = level && topic;
 
   async function startQuiz() {
     setLoading(true);
+    clearQuizState();
+    clearResults();
     const res = await fetch(`/api/questions?level=${encodeURIComponent(level)}&topic=${encodeURIComponent(topic)}`);
-    const data = await res.json();
-    setQuestions(data);
-    setCurrent(0);
-    setScore(0);
-    setElapsedTime(0);
-    setWrongAnswers([]);
-    setAnswered(false);
-    setSelected(null);
-    setLoading(false);
-    if (session?.user?.name) setPlayerName(session.user.name);
-    setTimerRunning(true);
-    setScreen('quiz');
+    const questions = await res.json();
+    saveQuizState({ level, topic, questions, current: 0, score: 0, elapsedTime: 0, wrongAnswers: [] });
+    router.push('/quiz');
   }
 
-  async function fetchLeaderboard() {
-    setLeaderboardLoading(true);
-    const res = await fetch(`/api/scores?level=${encodeURIComponent(level)}&topic=${encodeURIComponent(topic)}`);
-    const data = await res.json();
-    setLeaderboard(data);
-    setLeaderboardLoading(false);
+  function viewLeaderboard() {
+    saveQuizState({ level, topic });
+    router.push('/leaderboard');
   }
 
-  async function viewLeaderboard() {
-    await fetchLeaderboard();
-    setScreen('leaderboard');
-  }
-
-  function selectAnswer(i) {
-    if (answered) return;
-    setSelected(i);
-    setAnswered(true);
-    const q = questions[current];
-    if (i === q.answer) {
-      setScore(s => s + 1);
-    } else {
-      setWrongAnswers(w => [...w, { question: q, selectedAnswer: i }]);
-    }
-  }
-
-  function next() {
-    if (current + 1 >= questions.length) {
-      setTimerRunning(false);
-      localStorage.removeItem('frenchQuizState');
-      if (session?.user?.name) {
-        setPlayerName(session.user.name);
-        submitScoreDirectly(session.user.name);
-      } else {
-        setScreen('nameentry');
-      }
-    } else {
-      setCurrent(c => c + 1);
-      setAnswered(false);
-      setSelected(null);
-    }
-  }
-
-  async function submitScoreDirectly(name) {
-    const percentage = Math.round((score / questions.length) * 100);
-    await fetch('/api/scores', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, level, topic, score, total: questions.length, percentage, time: elapsedTime }),
-    });
-    await fetchLeaderboard();
-    setScreen('results');
-  }
-
-  async function submitScore() {
-    if (!playerName.trim()) return;
-    const percentage = Math.round((score / questions.length) * 100);
-    await fetch('/api/scores', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: playerName.trim(), level, topic, score, total: questions.length, percentage, time: elapsedTime }),
-    });
-    await fetchLeaderboard();
-    setScreen('results');
-  }
-
-  function restart() {
-    localStorage.removeItem('frenchQuizState');
-    setTimerRunning(false);
-    setElapsedTime(0);
-    setWrongAnswers([]);
-    setLevel('');
-    setTopic('');
-    setPlayerName('');
-    setLeaderboard([]);
-    setScreen('start');
-  }
-
-  const canStart = level && topic;
-
-  if (!hydrated) return null;
-
-  if (screen === 'start') return (
+  return (
     <main style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <FrenchFlag opacity={0.13} />
       <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '480px', padding: '2rem 1.5rem', margin: '0 auto' }}>
@@ -291,214 +140,6 @@ function Home() {
       </div>
     </main>
   );
-
-  if (screen === 'quiz') {
-    const q = questions[current];
-    const pct = Math.round((current / questions.length) * 100);
-    return (
-      <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#999', marginBottom: '8px' }}>
-          <span>{level} — {topic}</span>
-          <span style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <span style={{ fontVariantNumeric: 'tabular-nums', color: elapsedTime > 120 ? '#ED2939' : '#999' }}>⏱ {formatTime(elapsedTime)}</span>
-            <span>{current + 1} / {questions.length}</span>
-          </span>
-        </div>
-        <div style={{ background: '#eee', borderRadius: '99px', height: '6px', marginBottom: '1.5rem' }}>
-          <div style={{ background: '#002395', height: '6px', borderRadius: '99px', width: `${pct}%`, transition: 'width 0.3s' }} />
-        </div>
-        <div style={{ background: 'white', border: '1px solid #eee', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
-          <p style={{ fontSize: '17px', fontWeight: '500', marginBottom: '1.25rem', lineHeight: '1.5', color: '#111' }}>{q.q}</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {q.options.map((o, i) => {
-              let bg = 'white', border = '1px solid #ccc', color = '#333';
-              if (answered) {
-                if (i === q.answer) { bg = '#EAF3DE'; border = '1px solid #3B6D11'; color = '#27500A'; }
-                else if (i === selected) { bg = '#FCEBEB'; border = '1px solid #A32D2D'; color = '#501313'; }
-              }
-              return <button key={i} onClick={() => selectAnswer(i)} disabled={answered} style={{ padding: '0.75rem 1rem', border, borderRadius: '8px', background: bg, color, cursor: answered ? 'default' : 'pointer', textAlign: 'left', fontSize: '15px' }}>{o}</button>;
-            })}
-          </div>
-          {answered && <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: '#f5f5f5', borderLeft: '3px solid #002395', borderRadius: '0 8px 8px 0', fontSize: '14px', color: '#555', lineHeight: '1.6' }}>{q.explanation}</div>}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '13px', color: '#999' }}>Score: {score} / {current + (answered ? 1 : 0)}</span>
-          {answered && <button onClick={next} style={{ padding: '0.6rem 1.25rem', border: '1px solid #ccc', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '14px' }}>{current + 1 < questions.length ? 'Next →' : 'Finish →'}</button>}
-        </div>
-        <div style={{ textAlign: 'center', marginTop: '0.75rem' }}>
-          <button onClick={restart} style={{ background: 'none', border: 'none', color: '#999', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>Return to home</button>
-        </div>
-      </main>
-    );
-  }
-
-  if (screen === 'nameentry') {
-    return (
-      <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '500', marginBottom: '0.5rem' }}>Quiz complete!</h1>
-        <div style={{ fontSize: '52px', fontWeight: '500', color: '#002395', margin: '1rem 0' }}>{score}/{questions.length}</div>
-        <div style={{ fontSize: '16px', color: '#999', marginBottom: '1rem' }}>Time: {formatTime(elapsedTime)}</div>
-        <p style={{ color: '#666', marginBottom: '2rem' }}>Enter your name to save your score to the leaderboard.</p>
-        <input
-          type="text"
-          placeholder="Your name"
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && submitScore()}
-          style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #ccc', borderRadius: '8px', fontSize: '16px', marginBottom: '1rem', boxSizing: 'border-box' }}
-        />
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={submitScore} disabled={!playerName.trim()} style={{ flex: 1, padding: '0.85rem', background: playerName.trim() ? '#002395' : '#ccc', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: playerName.trim() ? 'pointer' : 'not-allowed' }}>
-            Save Score
-          </button>
-          <button onClick={() => { fetchLeaderboard(); setScreen('results'); }} style={{ flex: 1, padding: '0.85rem', background: 'white', color: '#666', border: '1px solid #ccc', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' }}>
-            Skip
-          </button>
-        </div>
-      </main>
-    );
-  }
-
-  if (screen === 'results') {
-    const pct = Math.round((score / questions.length) * 100);
-    const msg = pct >= 80 ? 'Excellent work!' : pct >= 60 ? 'Good effort, keep practising!' : 'Keep going — repetition is key!';
-    return (
-      <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '500', marginBottom: '0.5rem', textAlign: 'center' }}>Results</h1>
-        <div style={{ fontSize: '52px', fontWeight: '500', color: '#002395', margin: '1rem 0', textAlign: 'center' }}>{score}/{questions.length}</div>
-        <div style={{ fontSize: '16px', color: '#999', textAlign: 'center', marginBottom: '0.5rem' }}>Time: {formatTime(elapsedTime)}</div>
-        <p style={{ color: '#666', marginBottom: '1.5rem', textAlign: 'center' }}>{msg}</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '1.5rem' }}>
-          {[['Correct', score], ['Incorrect', questions.length - score], ['Score', `${pct}%`]].map(([label, val]) => (
-            <div key={label} style={{ background: '#f5f5f5', borderRadius: '8px', padding: '0.75rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '12px', color: '#999', marginBottom: '4px' }}>{label}</div>
-              <div style={{ fontSize: '20px', fontWeight: '500' }}>{val}</div>
-            </div>
-          ))}
-        </div>
-
-        {wrongAnswers.length > 0 && (
-          <button onClick={() => setScreen('review')} style={{ width: '100%', padding: '0.85rem', background: '#ED2939', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '1.5rem' }}>
-            Review {wrongAnswers.length} incorrect answer{wrongAnswers.length > 1 ? 's' : ''} →
-          </button>
-        )}
-
-        <h2 style={{ fontSize: '16px', fontWeight: '500', marginBottom: '1rem' }}>Leaderboard — {level} {topic}</h2>
-        {leaderboardLoading ? (
-          <p style={{ color: '#999', fontSize: '14px' }}>Loading leaderboard...</p>
-        ) : leaderboard.length === 0 ? (
-          <p style={{ color: '#999', fontSize: '14px' }}>No scores yet for this level and topic.</p>
-        ) : (
-          <div style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden', marginBottom: '1.5rem' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-              <thead>
-                <tr style={{ background: '#f5f5f5' }}>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: '500', color: '#555' }}>#</th>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: '500', color: '#555' }}>Name</th>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Score</th>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Time</th>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboard.map((entry, i) => (
-                  <tr key={i} style={{ borderTop: '1px solid #eee', background: entry.name === playerName ? '#e8ecf7' : 'white' }}>
-                    <td style={{ padding: '0.6rem 0.75rem', color: i === 0 ? '#002395' : '#666', fontWeight: i === 0 ? '500' : '400' }}>{i + 1}</td>
-                    <td style={{ padding: '0.6rem 0.75rem', color: '#333' }}>{entry.name}</td>
-                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#333' }}>{entry.score}/{entry.total} ({entry.percentage}%)</td>
-                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#333' }}>{formatTime(entry.time)}</td>
-                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#999' }}>{entry.date}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-        <button onClick={restart} style={{ width: '100%', padding: '0.85rem', background: '#002395', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' }}>Back to start</button>
-      </main>
-    );
-  }
-
-  if (screen === 'review') {
-    return (
-      <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '500', marginBottom: '0.25rem' }}>Review</h1>
-        <p style={{ color: '#999', fontSize: '14px', marginBottom: '1.5rem' }}>{wrongAnswers.length} incorrect answer{wrongAnswers.length > 1 ? 's' : ''} — {level} {topic}</p>
-
-        {wrongAnswers.map((item, idx) => (
-          <div key={idx} style={{ background: 'white', border: '1px solid #eee', borderRadius: '12px', padding: '1.25rem', marginBottom: '1rem' }}>
-            <p style={{ fontSize: '15px', fontWeight: '500', marginBottom: '1rem', lineHeight: '1.5', color: '#111' }}>{item.question.q}</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1rem' }}>
-              {item.question.options.map((o, i) => {
-                let bg = 'white', border = '1px solid #eee', color = '#999';
-                if (i === item.question.answer) { bg = '#EAF3DE'; border = '1px solid #3B6D11'; color = '#27500A'; }
-                else if (i === item.selectedAnswer) { bg = '#FCEBEB'; border = '1px solid #A32D2D'; color = '#501313'; }
-                return (
-                  <div key={i} style={{ padding: '0.6rem 0.9rem', border, borderRadius: '8px', background: bg, color, fontSize: '14px' }}>
-                    {o}
-                    {i === item.question.answer && <span style={{ marginLeft: '8px', fontSize: '12px' }}>✓ Correct</span>}
-                    {i === item.selectedAnswer && i !== item.question.answer && <span style={{ marginLeft: '8px', fontSize: '12px' }}>✗ Your answer</span>}
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{ padding: '0.75rem 1rem', background: '#f5f5f5', borderLeft: '3px solid #002395', borderRadius: '0 8px 8px 0', fontSize: '13px', color: '#555', lineHeight: '1.6' }}>
-              {item.question.explanation}
-            </div>
-          </div>
-        ))}
-
-        <button onClick={() => setScreen('results')} style={{ width: '100%', padding: '0.85rem', background: '#002395', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginTop: '0.5rem' }}>Back to results</button>
-      </main>
-    );
-  }
-
-  if (screen === 'leaderboard') {
-    return (
-      <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '500', marginBottom: '0.25rem' }}>Leaderboard</h1>
-        <p style={{ color: '#999', fontSize: '14px', marginBottom: '1.5rem' }}>{level} — {topic}</p>
-        {leaderboardLoading ? (
-          <p style={{ color: '#999', fontSize: '14px' }}>Loading...</p>
-        ) : leaderboard.length === 0 ? (
-          <p style={{ color: '#999', fontSize: '14px' }}>No scores yet for this level and topic. Be the first!</p>
-        ) : (
-          <div style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden', marginBottom: '1.5rem' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-              <thead>
-                <tr style={{ background: '#f5f5f5' }}>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: '500', color: '#555' }}>#</th>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: '500', color: '#555' }}>Name</th>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Score</th>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Time</th>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboard.map((entry, i) => (
-                  <tr key={i} style={{ borderTop: '1px solid #eee', background: i === 0 ? '#e8ecf7' : 'white' }}>
-                    <td style={{ padding: '0.6rem 0.75rem', color: i === 0 ? '#002395' : '#666', fontWeight: i === 0 ? '500' : '400' }}>{i + 1}</td>
-                    <td style={{ padding: '0.6rem 0.75rem', color: '#333' }}>{entry.name}</td>
-                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#333' }}>{entry.score}/{entry.total} ({entry.percentage}%)</td>
-                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#333' }}>{formatTime(entry.time)}</td>
-                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#999' }}>{entry.date}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={startQuiz} style={{ flex: 1, padding: '0.85rem', background: '#002395', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' }}>
-            {loading ? 'Loading...' : 'Start Quiz'}
-          </button>
-          <button onClick={restart} style={{ flex: 1, padding: '0.85rem', background: 'white', color: '#666', border: '1px solid #ccc', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' }}>
-            Back to start
-          </button>
-        </div>
-      </main>
-    );
-  }
 }
 
-export default dynamic(() => Promise.resolve(Home), { ssr: false });
+export default dynamic(() => Promise.resolve(StartPage), { ssr: false });
