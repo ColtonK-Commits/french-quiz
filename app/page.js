@@ -137,6 +137,9 @@ function StartPage() {
             Leaderboard
           </button>
         </div>
+        <button onClick={() => router.push('/expressions')} style={{ width: '100%', padding: '0.85rem', background: 'rgba(255,255,255,0.85)', color: '#333', border: '1px solid #ccc', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginTop: '12px' }}>
+          Learn new expressions
+        </button>
       </div>
     </main>
   );
