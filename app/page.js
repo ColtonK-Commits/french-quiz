@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSession, signIn, signOut } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 
 function FrenchFlag({ opacity = 0.13 }) {
@@ -65,6 +66,7 @@ function FrenchFlag({ opacity = 0.13 }) {
 }
 
 function Home() {
+  const { data: session } = useSession();
   const [level, setLevel] = useState('');
   const [topic, setTopic] = useState('');
   const [screen, setScreen] = useState('start');
@@ -77,9 +79,51 @@ function Home() {
   const [playerName, setPlayerName] = useState('');
   const [leaderboard, setLeaderboard] = useState([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
   const levels = ['A1', 'A2', 'B1', 'B2'];
   const topics = ['French Grammar', 'French History & Geography', 'French Regional Food & Cooking'];
+
+  // Load saved state from localStorage on first render
+  useEffect(() => {
+    const saved = localStorage.getItem('frenchQuizState');
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        if (state.screen && state.screen !== 'start' && state.questions?.length > 0) {
+          setScreen(state.screen);
+          setLevel(state.level || '');
+          setTopic(state.topic || '');
+          setCurrent(state.current || 0);
+          setScore(state.score || 0);
+          setQuestions(state.questions || []);
+          setAnswered(false);
+          setSelected(null);
+        }
+      } catch (e) {
+        localStorage.removeItem('frenchQuizState');
+      }
+    }
+    setHydrated(true);
+  }, []);
+
+  // Save state to localStorage whenever key state changes
+  useEffect(() => {
+    if (!hydrated) return;
+    if (screen === 'start') {
+      localStorage.removeItem('frenchQuizState');
+      return;
+    }
+    if (screen === 'results' || screen === 'nameentry') {
+      localStorage.removeItem('frenchQuizState');
+      return;
+    }
+    if (questions.length > 0) {
+      localStorage.setItem('frenchQuizState', JSON.stringify({
+        screen, level, topic, current, score, questions
+      }));
+    }
+  }, [screen, current, score, hydrated]);
 
   async function startQuiz() {
     setLoading(true);
@@ -91,6 +135,9 @@ function Home() {
     setAnswered(false);
     setSelected(null);
     setLoading(false);
+    if (session?.user?.name) {
+      setPlayerName(session.user.name);
+    }
     setScreen('quiz');
   }
 
@@ -116,12 +163,29 @@ function Home() {
 
   function next() {
     if (current + 1 >= questions.length) {
-      setScreen('nameentry');
+      localStorage.removeItem('frenchQuizState');
+      if (session?.user?.name) {
+        setPlayerName(session.user.name);
+        submitScoreDirectly(session.user.name);
+      } else {
+        setScreen('nameentry');
+      }
     } else {
       setCurrent(c => c + 1);
       setAnswered(false);
       setSelected(null);
     }
+  }
+
+  async function submitScoreDirectly(name) {
+    const percentage = Math.round((score / questions.length) * 100);
+    await fetch('/api/scores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, level, topic, score, total: questions.length, percentage }),
+    });
+    await fetchLeaderboard();
+    setScreen('results');
   }
 
   async function submitScore() {
@@ -137,6 +201,7 @@ function Home() {
   }
 
   function restart() {
+    localStorage.removeItem('frenchQuizState');
     setLevel('');
     setTopic('');
     setPlayerName('');
@@ -146,12 +211,29 @@ function Home() {
 
   const canStart = level && topic;
 
+  if (!hydrated) return null;
+
   if (screen === 'start') return (
     <main style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <FrenchFlag opacity={0.13} />
       <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '480px', padding: '2rem 1.5rem', margin: '0 auto' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: '500', marginBottom: '0.5rem', color: '#111' }}>French Quiz</h1>
-        <p style={{ color: '#666', marginBottom: '2rem' }}>Choose your level and topic to begin.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div>
+            <h1 style={{ fontSize: '28px', fontWeight: '500', color: '#111', margin: 0 }}>French Quiz</h1>
+            {session?.user?.name && <p style={{ fontSize: '13px', color: '#666', margin: '4px 0 0' }}>Signed in as {session.user.name}</p>}
+          </div>
+          {session ? (
+            <button onClick={() => signOut()} style={{ padding: '0.4rem 0.9rem', border: '1px solid #ccc', borderRadius: '8px', background: 'rgba(255,255,255,0.85)', color: '#666', cursor: 'pointer', fontSize: '13px' }}>Sign out</button>
+          ) : (
+            <button onClick={() => signIn('google')} style={{ padding: '0.4rem 0.9rem', border: '1px solid #002395', borderRadius: '8px', background: 'rgba(255,255,255,0.85)', color: '#002395', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}>Sign in with Google</button>
+          )}
+        </div>
+
+        {!session && (
+          <div style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1.5rem', fontSize: '13px', color: '#666' }}>
+            Sign in with Google to save your scores automatically. Or play as a guest and enter your name at the end.
+          </div>
+        )}
 
         <h2 style={{ fontSize: '13px', color: '#999', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>LEVEL</h2>
         <div style={{ display: 'flex', gap: '12px', marginBottom: '2rem', flexWrap: 'wrap' }}>
@@ -206,15 +288,17 @@ function Home() {
           {answered && <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: '#f5f5f5', borderLeft: '3px solid #002395', borderRadius: '0 8px 8px 0', fontSize: '14px', color: '#555', lineHeight: '1.6' }}>{q.explanation}</div>}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '13px', color: '#999' }}>Score: {score} / {current + (answered ? 1 : 0)}</span>
-          {answered && <button onClick={next} style={{ padding: '0.6rem 1.25rem', border: '1px solid #ccc', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '14px' }}>{current + 1 < questions.length ? 'Next →' : 'Finish →'}</button>}
-        </div>
+  <span style={{ fontSize: '13px', color: '#999' }}>Score: {score} / {current + (answered ? 1 : 0)}</span>
+  {answered && <button onClick={next} style={{ padding: '0.6rem 1.25rem', border: '1px solid #ccc', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '14px' }}>{current + 1 < questions.length ? 'Next →' : 'Finish →'}</button>}
+</div>
+<div style={{ textAlign: 'center', marginTop: '0.75rem' }}>
+  <button onClick={restart} style={{ background: 'none', border: 'none', color: '#999', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>Return to home</button>
+</div>
       </main>
     );
   }
 
   if (screen === 'nameentry') {
-    const pct = Math.round((score / questions.length) * 100);
     return (
       <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem', textAlign: 'center' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '500', marginBottom: '0.5rem' }}>Quiz complete!</h1>
@@ -286,7 +370,6 @@ function Home() {
             </table>
           </div>
         )}
-
         <button onClick={restart} style={{ width: '100%', padding: '0.85rem', background: '#002395', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' }}>Back to start</button>
       </main>
     );
