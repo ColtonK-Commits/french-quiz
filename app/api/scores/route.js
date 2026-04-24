@@ -13,10 +13,10 @@ export async function GET(request) {
   try {
     const db = new Database(path.join(process.cwd(), 'french_quiz.db'));
     const scores = db.prepare(`
-      SELECT name, score, total, percentage, date 
+      SELECT name, score, total, percentage, time, date 
       FROM scores 
       WHERE level = ? AND topic = ? 
-      ORDER BY percentage DESC, score DESC 
+      ORDER BY percentage DESC, score DESC, time ASC
       LIMIT 10
     `).all(level, topic);
     db.close();
@@ -29,7 +29,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, level, topic, score, total, percentage } = body;
+    const { name, level, topic, score, total, percentage, time } = body;
 
     if (!name || !level || !topic || score === undefined || !total || !percentage) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
@@ -39,9 +39,9 @@ export async function POST(request) {
     const date = new Date().toLocaleDateString('en-GB');
     
     db.prepare(`
-      INSERT INTO scores (name, level, topic, score, total, percentage, date)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(name, level, topic, score, total, percentage, date);
+      INSERT INTO scores (name, level, topic, score, total, percentage, time, date)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(name, level, topic, score, total, percentage, time || 0, date);
     
     db.close();
     return Response.json({ success: true });

@@ -65,6 +65,12 @@ function FrenchFlag({ opacity = 0.13 }) {
   );
 }
 
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 function Home() {
   const { data: session } = useSession();
   const [level, setLevel] = useState('');
@@ -80,9 +86,25 @@ function Home() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [wrongAnswers, setWrongAnswers] = useState([]);
+  const timerRef = useRef(null);
 
   const levels = ['A1', 'A2', 'B1', 'B2'];
   const topics = ['French Grammar', 'French History & Geography', 'French Regional Food & Cooking'];
+
+  // Timer effect
+  useEffect(() => {
+    if (timerRunning) {
+      timerRef.current = setInterval(() => {
+        setElapsedTime(t => t + 1);
+      }, 1000);
+    } else {
+      clearInterval(timerRef.current);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [timerRunning]);
 
   // Load saved state from localStorage on first render
   useEffect(() => {
@@ -97,8 +119,11 @@ function Home() {
           setCurrent(state.current || 0);
           setScore(state.score || 0);
           setQuestions(state.questions || []);
+          setElapsedTime(state.elapsedTime || 0);
+          setWrongAnswers(state.wrongAnswers || []);
           setAnswered(false);
           setSelected(null);
+          if (state.screen === 'quiz') setTimerRunning(true);
         }
       } catch (e) {
         localStorage.removeItem('frenchQuizState');
@@ -110,20 +135,16 @@ function Home() {
   // Save state to localStorage whenever key state changes
   useEffect(() => {
     if (!hydrated) return;
-    if (screen === 'start') {
-      localStorage.removeItem('frenchQuizState');
-      return;
-    }
-    if (screen === 'results' || screen === 'nameentry') {
+    if (screen === 'start' || screen === 'results' || screen === 'nameentry' || screen === 'review') {
       localStorage.removeItem('frenchQuizState');
       return;
     }
     if (questions.length > 0) {
       localStorage.setItem('frenchQuizState', JSON.stringify({
-        screen, level, topic, current, score, questions
+        screen, level, topic, current, score, questions, elapsedTime, wrongAnswers
       }));
     }
-  }, [screen, current, score, hydrated]);
+  }, [screen, current, score, elapsedTime, hydrated]);
 
   async function startQuiz() {
     setLoading(true);
@@ -132,12 +153,13 @@ function Home() {
     setQuestions(data);
     setCurrent(0);
     setScore(0);
+    setElapsedTime(0);
+    setWrongAnswers([]);
     setAnswered(false);
     setSelected(null);
     setLoading(false);
-    if (session?.user?.name) {
-      setPlayerName(session.user.name);
-    }
+    if (session?.user?.name) setPlayerName(session.user.name);
+    setTimerRunning(true);
     setScreen('quiz');
   }
 
@@ -158,11 +180,17 @@ function Home() {
     if (answered) return;
     setSelected(i);
     setAnswered(true);
-    if (i === questions[current].answer) setScore(s => s + 1);
+    const q = questions[current];
+    if (i === q.answer) {
+      setScore(s => s + 1);
+    } else {
+      setWrongAnswers(w => [...w, { question: q, selectedAnswer: i }]);
+    }
   }
 
   function next() {
     if (current + 1 >= questions.length) {
+      setTimerRunning(false);
       localStorage.removeItem('frenchQuizState');
       if (session?.user?.name) {
         setPlayerName(session.user.name);
@@ -182,7 +210,7 @@ function Home() {
     await fetch('/api/scores', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, level, topic, score, total: questions.length, percentage }),
+      body: JSON.stringify({ name, level, topic, score, total: questions.length, percentage, time: elapsedTime }),
     });
     await fetchLeaderboard();
     setScreen('results');
@@ -194,7 +222,7 @@ function Home() {
     await fetch('/api/scores', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: playerName.trim(), level, topic, score, total: questions.length, percentage }),
+      body: JSON.stringify({ name: playerName.trim(), level, topic, score, total: questions.length, percentage, time: elapsedTime }),
     });
     await fetchLeaderboard();
     setScreen('results');
@@ -202,6 +230,9 @@ function Home() {
 
   function restart() {
     localStorage.removeItem('frenchQuizState');
+    setTimerRunning(false);
+    setElapsedTime(0);
+    setWrongAnswers([]);
     setLevel('');
     setTopic('');
     setPlayerName('');
@@ -268,7 +299,10 @@ function Home() {
       <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#999', marginBottom: '8px' }}>
           <span>{level} — {topic}</span>
-          <span>{current + 1} / {questions.length}</span>
+          <span style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <span style={{ fontVariantNumeric: 'tabular-nums', color: elapsedTime > 120 ? '#ED2939' : '#999' }}>⏱ {formatTime(elapsedTime)}</span>
+            <span>{current + 1} / {questions.length}</span>
+          </span>
         </div>
         <div style={{ background: '#eee', borderRadius: '99px', height: '6px', marginBottom: '1.5rem' }}>
           <div style={{ background: '#002395', height: '6px', borderRadius: '99px', width: `${pct}%`, transition: 'width 0.3s' }} />
@@ -288,12 +322,12 @@ function Home() {
           {answered && <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: '#f5f5f5', borderLeft: '3px solid #002395', borderRadius: '0 8px 8px 0', fontSize: '14px', color: '#555', lineHeight: '1.6' }}>{q.explanation}</div>}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-  <span style={{ fontSize: '13px', color: '#999' }}>Score: {score} / {current + (answered ? 1 : 0)}</span>
-  {answered && <button onClick={next} style={{ padding: '0.6rem 1.25rem', border: '1px solid #ccc', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '14px' }}>{current + 1 < questions.length ? 'Next →' : 'Finish →'}</button>}
-</div>
-<div style={{ textAlign: 'center', marginTop: '0.75rem' }}>
-  <button onClick={restart} style={{ background: 'none', border: 'none', color: '#999', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>Return to home</button>
-</div>
+          <span style={{ fontSize: '13px', color: '#999' }}>Score: {score} / {current + (answered ? 1 : 0)}</span>
+          {answered && <button onClick={next} style={{ padding: '0.6rem 1.25rem', border: '1px solid #ccc', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '14px' }}>{current + 1 < questions.length ? 'Next →' : 'Finish →'}</button>}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: '0.75rem' }}>
+          <button onClick={restart} style={{ background: 'none', border: 'none', color: '#999', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>Return to home</button>
+        </div>
       </main>
     );
   }
@@ -303,6 +337,7 @@ function Home() {
       <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem', textAlign: 'center' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '500', marginBottom: '0.5rem' }}>Quiz complete!</h1>
         <div style={{ fontSize: '52px', fontWeight: '500', color: '#002395', margin: '1rem 0' }}>{score}/{questions.length}</div>
+        <div style={{ fontSize: '16px', color: '#999', marginBottom: '1rem' }}>Time: {formatTime(elapsedTime)}</div>
         <p style={{ color: '#666', marginBottom: '2rem' }}>Enter your name to save your score to the leaderboard.</p>
         <input
           type="text"
@@ -331,8 +366,9 @@ function Home() {
       <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '500', marginBottom: '0.5rem', textAlign: 'center' }}>Results</h1>
         <div style={{ fontSize: '52px', fontWeight: '500', color: '#002395', margin: '1rem 0', textAlign: 'center' }}>{score}/{questions.length}</div>
+        <div style={{ fontSize: '16px', color: '#999', textAlign: 'center', marginBottom: '0.5rem' }}>Time: {formatTime(elapsedTime)}</div>
         <p style={{ color: '#666', marginBottom: '1.5rem', textAlign: 'center' }}>{msg}</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '1.5rem' }}>
           {[['Correct', score], ['Incorrect', questions.length - score], ['Score', `${pct}%`]].map(([label, val]) => (
             <div key={label} style={{ background: '#f5f5f5', borderRadius: '8px', padding: '0.75rem', textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#999', marginBottom: '4px' }}>{label}</div>
@@ -340,6 +376,12 @@ function Home() {
             </div>
           ))}
         </div>
+
+        {wrongAnswers.length > 0 && (
+          <button onClick={() => setScreen('review')} style={{ width: '100%', padding: '0.85rem', background: '#ED2939', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '1.5rem' }}>
+            Review {wrongAnswers.length} incorrect answer{wrongAnswers.length > 1 ? 's' : ''} →
+          </button>
+        )}
 
         <h2 style={{ fontSize: '16px', fontWeight: '500', marginBottom: '1rem' }}>Leaderboard — {level} {topic}</h2>
         {leaderboardLoading ? (
@@ -354,6 +396,7 @@ function Home() {
                   <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: '500', color: '#555' }}>#</th>
                   <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: '500', color: '#555' }}>Name</th>
                   <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Score</th>
+                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Time</th>
                   <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Date</th>
                 </tr>
               </thead>
@@ -363,6 +406,7 @@ function Home() {
                     <td style={{ padding: '0.6rem 0.75rem', color: i === 0 ? '#002395' : '#666', fontWeight: i === 0 ? '500' : '400' }}>{i + 1}</td>
                     <td style={{ padding: '0.6rem 0.75rem', color: '#333' }}>{entry.name}</td>
                     <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#333' }}>{entry.score}/{entry.total} ({entry.percentage}%)</td>
+                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#333' }}>{formatTime(entry.time)}</td>
                     <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#999' }}>{entry.date}</td>
                   </tr>
                 ))}
@@ -371,6 +415,40 @@ function Home() {
           </div>
         )}
         <button onClick={restart} style={{ width: '100%', padding: '0.85rem', background: '#002395', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' }}>Back to start</button>
+      </main>
+    );
+  }
+
+  if (screen === 'review') {
+    return (
+      <main style={{ maxWidth: '480px', margin: '4rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '500', marginBottom: '0.25rem' }}>Review</h1>
+        <p style={{ color: '#999', fontSize: '14px', marginBottom: '1.5rem' }}>{wrongAnswers.length} incorrect answer{wrongAnswers.length > 1 ? 's' : ''} — {level} {topic}</p>
+
+        {wrongAnswers.map((item, idx) => (
+          <div key={idx} style={{ background: 'white', border: '1px solid #eee', borderRadius: '12px', padding: '1.25rem', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '15px', fontWeight: '500', marginBottom: '1rem', lineHeight: '1.5', color: '#111' }}>{item.question.q}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1rem' }}>
+              {item.question.options.map((o, i) => {
+                let bg = 'white', border = '1px solid #eee', color = '#999';
+                if (i === item.question.answer) { bg = '#EAF3DE'; border = '1px solid #3B6D11'; color = '#27500A'; }
+                else if (i === item.selectedAnswer) { bg = '#FCEBEB'; border = '1px solid #A32D2D'; color = '#501313'; }
+                return (
+                  <div key={i} style={{ padding: '0.6rem 0.9rem', border, borderRadius: '8px', background: bg, color, fontSize: '14px' }}>
+                    {o}
+                    {i === item.question.answer && <span style={{ marginLeft: '8px', fontSize: '12px' }}>✓ Correct</span>}
+                    {i === item.selectedAnswer && i !== item.question.answer && <span style={{ marginLeft: '8px', fontSize: '12px' }}>✗ Your answer</span>}
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ padding: '0.75rem 1rem', background: '#f5f5f5', borderLeft: '3px solid #002395', borderRadius: '0 8px 8px 0', fontSize: '13px', color: '#555', lineHeight: '1.6' }}>
+              {item.question.explanation}
+            </div>
+          </div>
+        ))}
+
+        <button onClick={() => setScreen('results')} style={{ width: '100%', padding: '0.85rem', background: '#002395', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginTop: '0.5rem' }}>Back to results</button>
       </main>
     );
   }
@@ -392,6 +470,7 @@ function Home() {
                   <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: '500', color: '#555' }}>#</th>
                   <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: '500', color: '#555' }}>Name</th>
                   <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Score</th>
+                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Time</th>
                   <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', fontWeight: '500', color: '#555' }}>Date</th>
                 </tr>
               </thead>
@@ -401,6 +480,7 @@ function Home() {
                     <td style={{ padding: '0.6rem 0.75rem', color: i === 0 ? '#002395' : '#666', fontWeight: i === 0 ? '500' : '400' }}>{i + 1}</td>
                     <td style={{ padding: '0.6rem 0.75rem', color: '#333' }}>{entry.name}</td>
                     <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#333' }}>{entry.score}/{entry.total} ({entry.percentage}%)</td>
+                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#333' }}>{formatTime(entry.time)}</td>
                     <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right', color: '#999' }}>{entry.date}</td>
                   </tr>
                 ))}
